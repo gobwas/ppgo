@@ -74,14 +74,14 @@ func (a *STRUCT(Array)) Upsert(x T) (prev T) {;;\
 	return;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) Delete(x K) (prev T) {;;\
+func (a *STRUCT(Array)) Delete(x K) (T, bool) {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, x, i, has);;\
 	if !has {;;\
 		a.mu.Unlock();;\
-		return;;\
+		return EMPTY(), false;;\
 	};;\
-	prev = a.data[i];;\
+	prev := a.data[i];;\
 	r := atomic.LoadInt64(&a.readers);;\
 	switch {;;\
 	case r == 0: >>> no readers, delete inplace;;\
@@ -94,7 +94,7 @@ func (a *STRUCT(Array)) Delete(x K) (prev T) {;;\
 		a.data = without;;\
 	};;\
 	a.mu.Unlock();;\
-	return;;\
+	return prev, true;;\
 };;\
 ;;\
 func (a *STRUCT(Array)) Ascend(cb func(x T) bool) bool {;;\
