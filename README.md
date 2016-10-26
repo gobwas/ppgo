@@ -39,7 +39,7 @@ generate:
 			output="$${base}_gen_test.go"; \
 		fi; \
 		tmp="$${output}.tmp"; \
-	   	cc -Iinclude -DGRAPHVIZ=$(GRAPHVIZ) -E -P $$tmpl \
+	   	cc -Iinclude -E -P $$tmpl \
 			| sed -E -e 's/>>>/\/\//g' \
 			| sed -e $$'s/;;/\\\n/g' \
 		   	> $$tmp; \
