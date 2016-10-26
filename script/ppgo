@@ -1,7 +1,8 @@
 #!/bin/bash
 base=$(basename $GOFILE .go)
 
-for tmpl in "${base}*.go.h"; do
+templates="$base"*.go.h
+for tmpl in $templates; do
 	name=$(basename $tmpl .go.h)
 	output="${name}_gen.go"
 	if [[ "$name" =~ "_test" ]]; then
@@ -32,3 +33,4 @@ for tmpl in "${base}*.go.h"; do
 	
 	echo "ppgo: okay for ${tmpl}";
 done
+
