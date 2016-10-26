@@ -74,6 +74,11 @@ func (a *STRUCT(Array)) Upsert(x T) (prev T) {;;\
 	return;;\
 };;\
 ;;\
+func (a *STRUCT(Array)) With(cb func(SLICE(T))) {;;\
+	READ_DATA(data);;\
+	cb(data);;\
+};;\
+;;\
 func (a *STRUCT(Array)) Delete(x K) (T, bool) {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, x, i, has);;\
