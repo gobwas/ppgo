@@ -1,16 +1,12 @@
 #!/bin/bash
-for tmpl in "${GOFILE}*.h"; do
-	tmpl="${GOFILE}.h"
-	if [ ! -f "$tmpl" ]; then
-		echo "ppgo: not found header file ${tmpl}"
-		exit 1
-	fi
-	
-	base=$(basename $GOFILE .go)
-	output="${base}_gen.go"
-	if [[ "$base" =~ "_test" ]]; then
-		base=$(basename $base _test)
-		output="${base}_gen_test.go"
+base=$(basename $GOFILE .go)
+
+for tmpl in "${base}*.go.h"; do
+	name=$(basename $tmpl .go.h)
+	output="${name}_gen.go"
+	if [[ "$name" =~ "_test" ]]; then
+		name=$(basename $name _test)
+		output="${name}_gen_test.go"
 	fi
 	
 	tmp="${output}.tmp";
