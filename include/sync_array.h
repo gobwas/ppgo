@@ -74,7 +74,7 @@ func (a *STRUCT(Array)) Upsert(x T) (prev T) {;;\
 	return;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) With(cb func(SLICE(T))) {;;\
+func (a *STRUCT(Array)) Do(cb func(SLICE(T))) {;;\
 	READ_DATA(data);;\
 	cb(data);;\
 };;\
