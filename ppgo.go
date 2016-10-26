@@ -1,9 +1,9 @@
 package main
 
 import (
-	"exec"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 )
@@ -14,7 +14,7 @@ func main() {
 	var scriptPath string
 	for _, p := range strings.Split(os.Getenv("GOPATH"), ":") {
 		f := path.Join(p, script)
-		if s, err := os.Stat(f); err == nil {
+		if _, err := os.Stat(f); err == nil {
 			scriptPath = f
 			break
 		}
@@ -23,7 +23,7 @@ func main() {
 		log.Fatalf("could not find ppgo generation script")
 	}
 	cmd := exec.Command("/bin/sh", scriptPath)
-	if err := cmd.Run(); err != nil {
-		log.Fatal(err)
-	}
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Run()
 }
