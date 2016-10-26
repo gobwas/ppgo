@@ -17,13 +17,13 @@ func (a *STRUCT(Array)) Has(x K) bool {;;\
 	return ok;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) Get(x K) T {;;\
+func (a *STRUCT(Array)) Get(x K) (T, bool) {;;\
 	READ_DATA(data);;\
 	DO_SEARCH(data, x, i, ok);;\
 	if !ok {;;\
-		return EMPTY();;\
+		return EMPTY(), false;;\
 	};;\
-	return data[i];;\
+	return data[i], true;;\
 };;\
 ;;\
 func (a *STRUCT(Array)) Getsert(x T) (ret T) {;;\
