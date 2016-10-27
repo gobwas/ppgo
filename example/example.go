@@ -1,3 +1,3 @@
-package test
+package example
 
 //go:generate ppgo
