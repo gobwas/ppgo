@@ -25,7 +25,7 @@ package strings
 
 Put the header file `strings/strings.go.h`:
 ```cpp
-#include "ppgo_sort.h"
+#include "ppgo/sort.h"
 
 #define ID(a) a
 #define LESS_OR_EQUAL(a, b) a <= b

@@ -1,4 +1,4 @@
-#include "sync_array.h"
+#include "ppgo/sync_array.h"
 
 #define ID(a) a
 #define LESS_OR_EQUAL(a, b) a <= b
