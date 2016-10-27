@@ -44,9 +44,9 @@ go generate ./strings
 
 Enjoy! :)
 
-### Example of API
+### Godoc 
 
-Is [here](https://godoc.org/github.com/gobwas/ppgo/example/ints) by godoc.
+Is [here](https://godoc.org/github.com/gobwas/ppgo/example/ints).
 
 ### More Examples
 
