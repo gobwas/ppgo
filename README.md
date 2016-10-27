@@ -44,6 +44,10 @@ go generate ./strings
 
 Enjoy! :)
 
+### Example of API
+
+Is [here](https://godoc.org/github.com/gobwas/ppgo/example/ints) by godoc.
+
 ### More Examples
 
 Please see `./example` folder to checkout current possibilities of `ppgo`.
