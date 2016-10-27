@@ -5,25 +5,25 @@ import "sync";;\
 import "sync/atomic";;\
 ;;\
 ;;\
->>> STRUCT(Array) represents synchronized sorted array of T.;;\
+>>> STRUCT() represents synchronized sorted array of T.;;\
 >>> Note that in most cases you should store it somewhere by pointer.;;\
 >>> This is needed because of non-pointer data inside, that used to syncrhonize usage.;;\
-type STRUCT(Array) struct {;;\
+type STRUCT() struct {;;\
 	mu sync.RWMutex;;\
 	data SLICE(T);;\
 	readers int64;;\
 };;\
-func CTOR(Array)() *STRUCT(Array) {;;\
-	return &STRUCT(Array){};;\
+func CTOR()() *STRUCT() {;;\
+	return &STRUCT(){};;\
 };;\
 ;;\
-func (a *STRUCT(Array)) Has(x K) bool {;;\
+func (a *STRUCT()) Has(x K) bool {;;\
 	READ_DATA(data);;\
 	DO_SEARCH(data, x, i, ok);;\
 	return ok;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) Get(x K) (T, bool) {;;\
+func (a *STRUCT()) Get(x K) (T, bool) {;;\
 	READ_DATA(data);;\
 	DO_SEARCH(data, x, i, ok);;\
 	if !ok {;;\
@@ -32,7 +32,7 @@ func (a *STRUCT(Array)) Get(x K) (T, bool) {;;\
 	return data[i], true;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) Getsert(x T) T {;;\
+func (a *STRUCT()) Getsert(x T) T {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, ID(x), i, has);;\
 	if has {;;\
@@ -55,7 +55,7 @@ func (a *STRUCT(Array)) Getsert(x T) T {;;\
 	return x;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) GetsertFn(k K, factory func() T) T {;;\
+func (a *STRUCT()) GetsertFn(k K, factory func() T) T {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, k, i, has);;\
 	if has {;;\
@@ -78,7 +78,7 @@ func (a *STRUCT(Array)) GetsertFn(k K, factory func() T) T {;;\
 	a.mu.Unlock();;\
 	return x;;\
 };;\
-func (a *STRUCT(Array)) Upsert(x T) (prev T) {;;\
+func (a *STRUCT()) Upsert(x T) (prev T) {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, ID(x), i, has);;\
 	r := atomic.LoadInt64(&a.readers);;\
@@ -104,12 +104,12 @@ func (a *STRUCT(Array)) Upsert(x T) (prev T) {;;\
 	return;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) Do(cb func(SLICE(T))) {;;\
+func (a *STRUCT()) Do(cb func(SLICE(T))) {;;\
 	READ_DATA(data);;\
 	cb(data);;\
 };;\
 ;;\
-func (a *STRUCT(Array)) Delete(x K) (T, bool) {;;\
+func (a *STRUCT()) Delete(x K) (T, bool) {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, x, i, has);;\
 	if !has {;;\
@@ -132,7 +132,7 @@ func (a *STRUCT(Array)) Delete(x K) (T, bool) {;;\
 	return prev, true;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) Ascend(cb func(x T) bool) bool {;;\
+func (a *STRUCT()) Ascend(cb func(x T) bool) bool {;;\
 	READ_DATA(data);;\
 	for _, x := range data {;;\
 		if !cb(x) {;;\
@@ -142,7 +142,7 @@ func (a *STRUCT(Array)) Ascend(cb func(x T) bool) bool {;;\
 	return true;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) AscendRange(x, y K, cb func(x T) bool) bool {;;\
+func (a *STRUCT()) AscendRange(x, y K, cb func(x T) bool) bool {;;\
 	READ_DATA(data);;\
 	DO_SEARCH_RANGE(a.data, x, 0, len(a.data), i, hasX);;\
 	DO_SEARCH_RANGE(a.data, y, i, len(a.data), j, hasY);;\
@@ -154,7 +154,7 @@ func (a *STRUCT(Array)) AscendRange(x, y K, cb func(x T) bool) bool {;;\
 	return true;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) Len() int {;;\
+func (a *STRUCT()) Len() int {;;\
 	a.mu.RLock();;\
 	n := len(a.data);;\
 	a.mu.RUnlock();;\

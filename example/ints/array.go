@@ -1,3 +1,3 @@
-package example
+package ints
 
 //go:generate ppgo
