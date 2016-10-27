@@ -26,27 +26,51 @@ func (a *STRUCT(Array)) Get(x K) (T, bool) {;;\
 	return data[i], true;;\
 };;\
 ;;\
-func (a *STRUCT(Array)) Getsert(x T) (ret T) {;;\
+func (a *STRUCT(Array)) Getsert(x T) T {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, ID(x), i, has);;\
+	if has {;;\
+		a.mu.Unlock();;\
+		return a.data[i];;\
+	};;\
 	r := atomic.LoadInt64(&a.readers);;\
 	switch {;;\
-	case has:;;\
-		ret = a.data[i];;\
 	case r == 0: >>> no readers, insert inplace;;\
 		if cap(a.data) == len(a.data) { >>> not enough storage in array;;\
 			goto copyCase;;\
 		};;\
 		INSERT_INPLACE(a.data, i, x);;\
-		ret = x;;\
 	copyCase:;;\
 		fallthrough;;\
 	case r > 0: >>> readers exists, do copy;;\
 		INSERT_COPY(a.data, SLICE(T), i, x);;\
-		ret = x;;\
 	};;\
 	a.mu.Unlock();;\
-	return;;\
+	return x;;\
+};;\
+;;\
+func (a *STRUCT(Array)) GetsertFn(k K, factory func() T) T {;;\
+	a.mu.Lock();;\
+	DO_SEARCH(a.data, k, i, has);;\
+	if has {;;\
+		a.mu.Unlock();;\
+		return a.data[i];;\
+	};;\
+	x := factory();;\
+	r := atomic.LoadInt64(&a.readers);;\
+	switch {;;\
+	case r == 0: >>> no readers, insert inplace;;\
+		if cap(a.data) == len(a.data) { >>> not enough storage in array;;\
+			goto copyCase;;\
+		};;\
+		INSERT_INPLACE(a.data, i, x);;\
+	copyCase:;;\
+		fallthrough;;\
+	case r > 0: >>> readers exists, do copy;;\
+		INSERT_COPY(a.data, SLICE(T), i, x);;\
+	};;\
+	a.mu.Unlock();;\
+	return x;;\
 };;\
 func (a *STRUCT(Array)) Upsert(x T) (prev T) {;;\
 	a.mu.Lock();;\
