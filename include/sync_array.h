@@ -5,10 +5,16 @@ import "sync";;\
 import "sync/atomic";;\
 ;;\
 ;;\
+>>> STRUCT(Array) represents synchronized sorted array of T.;;\
+>>> Note that in most cases you should store it somewhere by pointer.;;\
+>>> This is needed because of non-pointer data inside, that used to syncrhonize usage.;;\
 type STRUCT(Array) struct {;;\
 	mu sync.RWMutex;;\
 	data SLICE(T);;\
 	readers int64;;\
+};;\
+func CTOR(Array)() *STRUCT(Array) {;;\
+	return &STRUCT(Array){};;\
 };;\
 ;;\
 func (a *STRUCT(Array)) Has(x K) bool {;;\

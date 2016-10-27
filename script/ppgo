@@ -3,6 +3,9 @@ base=$(basename $GOFILE .go)
 
 templates="$base"*.go.h
 for tmpl in $templates; do
+	if [ ! -f $tmpl ]; then
+		continue
+	fi
 	name=$(basename $tmpl .go.h)
 	output="${name}_gen.go"
 	if [[ "$name" =~ "_test" ]]; then
