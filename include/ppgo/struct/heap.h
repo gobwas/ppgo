@@ -42,7 +42,7 @@ func (h *STRUCT()) Pop() T {;;\
 	return ret;;\
 };;\
 ;;\
-func (h *STRUCT()) Insert(x T) {;;\
+func (h *STRUCT()) Push(x T) {;;\
 	_PUSH_BACK(x, i);;\
 	h.siftUp(i);;\
 };;\
@@ -65,6 +65,7 @@ func (h *STRUCT()) Slice() []T {;;\
 ;;\
 func (h *STRUCT()) Data() []T { return h.data };;\
 func (h *STRUCT()) Len() int { return len(h.data) } ;;\
+func (h *STRUCT()) Empty() bool { return len(h.data) == 0 };;\
 ;;\
 func (h STRUCT()) siftDown(root int) {;;\
 	_SIFT_DOWN(root, _HEAP_SWAP, LESS_OR_EQUAL);;\

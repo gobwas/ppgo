@@ -80,8 +80,9 @@ func (h *STRUCT()) Slice() []T {;;\
 };;\
 ;;\
 func (h *STRUCT()) Len() int { return len(h.data) };;\
+func (h *STRUCT()) Empty() bool { return len(h.data) == 0 };;\
 ;;\
-func (h *STRUCT()) Insert(x T, w W) {;;\
+func (h *STRUCT()) Push(x T, w W) {;;\
 	r := R{x, w};;\
 	_PUSH_BACK(r, i);;\
 	h.index[x] = i;;\
