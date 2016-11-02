@@ -1,8 +1,7 @@
-#define SLICE(a) []a
-#define VAR(a) i##a
+#include "ppgo/util.h"
 
-#define _CONCAT(a, b) a ## b
-#define CONCAT(a, b) _CONCAT(a, b)
+#ifndef _PPGO_ALGORITHM_SORT_
+#define	_PPGO_ALGORITHM_SORT_
 
 #define MAKE_SORT(T, K);;\
 	func FUNC(QuickSort)(data SLICE(T), lo, hi int) {;;\
@@ -50,7 +49,7 @@
 #define DO_INSERTION_SORT(DATA, L, R)\
 	>>> Insertion sort algorithm.;;\
 	for i := L + 1;; i < R;; i++ {;;\
-		for j := i;; j > L && GREATER(DATA[j-1], DATA[j]);; j-- {;;\
+		for j := i;; j > L && !(LESS_OR_EQUAL(DATA[j-1], DATA[j]));; j-- {;;\
 			DO_SWAP(DATA, j, j-1);;\
 		};;\
 	}\
@@ -85,3 +84,4 @@
 #define DO_SEARCH_SHORT(DATA, KEY, RIGHT)\
 	DO_SEARCH(DATA, KEY, RIGHT, CONCAT(ok, __COUNTER__))\
 
+#endif /* !_PPGO_ALGORITHM_SORT_ */

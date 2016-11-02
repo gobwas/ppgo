@@ -1,4 +1,13 @@
-#include "sort.h"
+#include "ppgo/algorithm/sort.h"
+
+/**
+ * This file contains an implementation of synchronized sorted array.
+ * It uses copy on write when there are some readers, otherway it makes
+ * inplace mutations.
+ */
+
+#ifndef _PPGO_STRUCT_SYNC_ARRAY_
+#define	_PPGO_STRUCT_SYNC_ARRAY_
 
 #define MAKE_ARRAY(T, K);;\
 import "sync";;\
@@ -180,3 +189,4 @@ func (a *STRUCT()) Len() int {;;\
 	defer atomic.AddInt64(&a.readers, -1);;\
 	a.mu.RUnlock()\
 
+#endif /* !_PPGO_STRUCT_SYNC_ARRAY_ */
