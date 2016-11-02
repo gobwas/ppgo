@@ -13,7 +13,7 @@ clean:
 bin/ppgo:
 	go build -o bin/ppgo
 
-generate: bin/ppgo
+generate: clean bin/ppgo
 	PATH=$$PWD/bin:$$PATH go generate ./example/ints/...
 	
 test: 
