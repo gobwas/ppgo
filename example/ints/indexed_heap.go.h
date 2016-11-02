@@ -4,7 +4,6 @@
 #define STRUCT(a) IndexedHeap
 #define CTOR() NewIndexedHeap
 #define EMPTY() 0
-#define ADD(a, b) a + b
 #define COMPARE(a, b) a - b
 
 package ints

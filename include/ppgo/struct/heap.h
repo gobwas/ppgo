@@ -55,8 +55,9 @@ func (h *STRUCT()) Slice() []T {;;\
 	cp := *h;;\
 	cp.data = make([]T, len(h.data));;\
 	copy(cp.data, h.data);;\
-	ret := h.data;;\
-	for i := 0; i < len(cp.data) - 1; i++ {;;\
+	ret := cp.data;;\
+	n := len(cp.data) - 1;;\
+	for i := 0; i < n; i++ {;;\
 		cp.data = cp.data[1:];;\
 		cp.siftDown(0);;\
 	};;\

@@ -6,6 +6,9 @@
 ### Benchmarks
 
 ```
+BenchmarkHeap/golang-4                3000000               446 ns/op              64 B/op          8 allocs/op
+BenchmarkHeap/ppgo-4                 20000000               110 ns/op               0 B/op          0 allocs/op
+
 BenchmarkSort/ppgo_10-4                  5000000               259 ns/op               0 B/op          0 allocs/op
 BenchmarkSort/ppgo_100-4                  300000              4758 ns/op               0 B/op          0 allocs/op
 BenchmarkSort/ppgo_1000-4                  30000             51842 ns/op               0 B/op          0 allocs/op
