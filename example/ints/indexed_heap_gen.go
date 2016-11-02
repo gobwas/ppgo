@@ -69,9 +69,10 @@ func (h *IndexedHeap) Slice() []int {
 	return ret
 }
 
-func (h *IndexedHeap) Len() int { return len(h.data) }
+func (h *IndexedHeap) Len() int    { return len(h.data) }
+func (h *IndexedHeap) Empty() bool { return len(h.data) == 0 }
 
-func (h *IndexedHeap) Insert(x int, w int) {
+func (h *IndexedHeap) Push(x int, w int) {
 	r := recordIndexedHeap{x, w}
 	i := len(h.data)
 	if cap(h.data) == len(h.data) {
@@ -90,15 +91,15 @@ func (h *IndexedHeap) Heapify() {
 	}
 }
 
-func (h *IndexedHeap) Add(x int, w int) {
+func (h *IndexedHeap) WithPriority(x int, fn func(int) int) {
 	i, ok := h.index[x]
 	if !ok {
 		panic("could not update value that is not present in heap")
 	}
-	h.update(i, recordIndexedHeap{x, h.data[i].w + w})
+	h.update(i, recordIndexedHeap{x, fn(h.data[i].w)})
 }
 
-func (h *IndexedHeap) Change(x int, w int) {
+func (h *IndexedHeap) ChangePriority(x int, w int) {
 	i, ok := h.index[x]
 	if !ok {
 		panic("could not update value that is not present in heap")

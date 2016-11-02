@@ -39,7 +39,7 @@ func (h *Heap) Pop() int {
 	return ret
 }
 
-func (h *Heap) Insert(x int) {
+func (h *Heap) Push(x int) {
 	i := len(h.data)
 	if cap(h.data) == len(h.data) {
 		h.data = append(h.data, x)
@@ -70,6 +70,7 @@ func (h *Heap) Slice() []int {
 
 func (h *Heap) Data() []int { return h.data }
 func (h *Heap) Len() int    { return len(h.data) }
+func (h *Heap) Empty() bool { return len(h.data) == 0 }
 
 func (h Heap) siftDown(root int) {
 	for {
