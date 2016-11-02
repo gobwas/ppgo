@@ -93,15 +93,15 @@ func (h *STRUCT()) Heapify() {;;\
 	_HEAPIFY(_INDEXED_HEAP_SWAP);;\
 };;\
 ;;\
-func (h *STRUCT()) AddPriority(x T, w W) {;;\
+func (h *STRUCT()) WithPriority(x T, fn func(W) W) {;;\
 	i, ok := h.index[x];;\
 	if !ok {;;\
 		panic("could not update value that is not present in heap");;\
 	};;\
-	h.update(i, R{x, ADD(h.data[i].w, w)});;\
+	h.update(i, R{x, fn(h.data[i].w)});;\
 };;\
 ;;\
-func (h *STRUCT()) SetPriority(x T, w W) {;;\
+func (h *STRUCT()) ChangePriority(x T, w W) {;;\
 	i, ok := h.index[x];;\
 	if !ok {;;\
 		panic("could not update value that is not present in heap");;\
