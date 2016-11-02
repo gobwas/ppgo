@@ -167,7 +167,7 @@ func (h IndexedHeap) siftDown(root int) {
 func (h IndexedHeap) siftUp(root int) {
 	for root > 0 {
 		parent := (root - 1) / h.d
-		if h.data[root].w <= h.data[parent].w {
+		if !(h.data[root].w <= h.data[parent].w) {
 			return
 		}
 		a, b := h.data[parent], h.data[root]

@@ -119,7 +119,7 @@ func (h STRUCT()) siftTop(root int) {;;\
 #define _SIFT_UP(root, SWAP_FN, LESS_OR_EQUAL_FN)\
 	for root > 0 {;;\
 		parent := (root - 1) / h.d;;\
-		if LESS_OR_EQUAL_FN(h.data[root], h.data[parent]) {;;\
+		if !(LESS_OR_EQUAL_FN(h.data[root], h.data[parent])) {;;\
 			return;;\
 		};;\
 		SWAP_FN(parent, root);;\

@@ -95,7 +95,7 @@ func (h Heap) siftDown(root int) {
 func (h Heap) siftUp(root int) {
 	for root > 0 {
 		parent := (root - 1) / h.d
-		if h.data[root] <= h.data[parent] {
+		if !(h.data[root] <= h.data[parent]) {
 			return
 		}
 		h.data[parent], h.data[root] = h.data[root], h.data[parent]
