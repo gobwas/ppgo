@@ -73,6 +73,10 @@ func (h *IndexedHeap) Len() int    { return len(h.data) }
 func (h *IndexedHeap) Empty() bool { return len(h.data) == 0 }
 
 func (h *IndexedHeap) Push(x int, w int) {
+	i, ok := h.index[x]
+	if ok {
+		panic("could not push value that is already present in heap")
+	}
 	r := recordIndexedHeap{x, w}
 	i := len(h.data)
 	if cap(h.data) == len(h.data) {

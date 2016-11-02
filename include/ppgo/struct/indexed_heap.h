@@ -83,6 +83,10 @@ func (h *STRUCT()) Len() int { return len(h.data) };;\
 func (h *STRUCT()) Empty() bool { return len(h.data) == 0 };;\
 ;;\
 func (h *STRUCT()) Push(x T, w W) {;;\
+	i, ok := h.index[x];;\
+	if ok {;;\
+		panic("could not push value that is already present in heap");;\
+	};;\
 	r := R{x, w};;\
 	_PUSH_BACK(r, i);;\
 	h.index[x] = i;;\
