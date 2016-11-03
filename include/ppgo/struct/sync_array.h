@@ -41,6 +41,21 @@ func (a *STRUCT()) Get(x K) (T, bool) {;;\
 	return data[i], true;;\
 };;\
 ;;\
+func (a *STRUCT()) GetAny(it func() (K, bool)) (T, bool) {;;\
+	READ_DATA(data);;\
+	for {;;\
+		k, ok := it();;\
+		if !ok {;;\
+			break;;\
+		};;\
+		DO_SEARCH(data, k, i, has);;\
+		if has {;;\
+			return data[i], true;;\
+		};;\
+	};;\
+	return EMPTY(), false;;\
+};;\
+;;\
 func (a *STRUCT()) Getsert(x T) T {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, ID(x), i, has);;\
@@ -87,6 +102,41 @@ func (a *STRUCT()) GetsertFn(k K, factory func() T) T {;;\
 	a.mu.Unlock();;\
 	return x;;\
 };;\
+;;\
+func (a *STRUCT()) GetsertAnyFn(it func() (K, bool), factory func() T) T {;;\
+	a.mu.Lock();;\
+	for {;;\
+		k, ok := it();;\
+		if !ok {;;\
+			break;;\
+		};;\
+		DO_SEARCH(a.data, k, i, has);;\
+		if has {;;\
+			a.mu.Unlock();;\
+			return a.data[i];;\
+		};;\
+	};;\
+	x := factory();;\
+	DO_SEARCH(a.data, ID(x), i, has);;\
+	if has {;;\
+		panic("inserting item that is already exists");;\
+	};;\
+	r := atomic.LoadInt64(&a.readers);;\
+	switch {;;\
+	case r == 0: >>> no readers, insert inplace;;\
+		if cap(a.data) == len(a.data) { >>> not enough storage in array;;\
+			goto copyCase;;\
+		};;\
+		INSERT_INPLACE(a.data, i, x);;\
+	copyCase:;;\
+		fallthrough;;\
+	case r > 0: >>> readers exists, do copy;;\
+		INSERT_COPY(a.data, SLICE(T), i, x);;\
+	};;\
+	a.mu.Unlock();;\
+	return x;;\
+};;\
+;;\
 func (a *STRUCT()) Upsert(x T) (prev T) {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, ID(x), i, has);;\

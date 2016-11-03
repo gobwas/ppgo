@@ -82,6 +82,45 @@ func (a *SyncArray) Get(x int) (int, bool) {
 	return data[i], true
 }
 
+func (a *SyncArray) GetAny(it func() (int, bool)) (int, bool) {
+	a.mu.RLock()
+	data := a.data
+	atomic.AddInt64(&a.readers, 1)
+	defer atomic.AddInt64(&a.readers, -1)
+	a.mu.RUnlock()
+	for {
+		k, ok := it()
+		if !ok {
+			break
+		}
+		// Binary search algorithm.
+		var has bool
+		var i int
+		{
+			l := 0
+			r := len(data)
+			for !has && l < r {
+				m := l + (r-l)/2
+				switch {
+				case data[m] == k:
+					has = true
+					r = m
+				case data[m] < k:
+					l = m + 1
+				case data[m] > k:
+					r = m
+				}
+			}
+			i = r
+			_ = i // in case when i not being used
+		}
+		if has {
+			return data[i], true
+		}
+	}
+	return 0, false
+}
+
 func (a *SyncArray) Getsert(x int) int {
 	a.mu.Lock()
 	// Binary search algorithm.
@@ -180,6 +219,87 @@ func (a *SyncArray) GetsertFn(k int, factory func() int) int {
 	a.mu.Unlock()
 	return x
 }
+
+func (a *SyncArray) GetsertAnyFn(it func() (int, bool), factory func() int) int {
+	a.mu.Lock()
+	for {
+		k, ok := it()
+		if !ok {
+			break
+		}
+		// Binary search algorithm.
+		var has bool
+		var i int
+		{
+			l := 0
+			r := len(a.data)
+			for !has && l < r {
+				m := l + (r-l)/2
+				switch {
+				case a.data[m] == k:
+					has = true
+					r = m
+				case a.data[m] < k:
+					l = m + 1
+				case a.data[m] > k:
+					r = m
+				}
+			}
+			i = r
+			_ = i // in case when i not being used
+		}
+		if has {
+			a.mu.Unlock()
+			return a.data[i]
+		}
+	}
+	x := factory()
+	// Binary search algorithm.
+	var has bool
+	var i int
+	{
+		l := 0
+		r := len(a.data)
+		for !has && l < r {
+			m := l + (r-l)/2
+			switch {
+			case a.data[m] == x:
+				has = true
+				r = m
+			case a.data[m] < x:
+				l = m + 1
+			case a.data[m] > x:
+				r = m
+			}
+		}
+		i = r
+		_ = i // in case when i not being used
+	}
+	if has {
+		panic("inserting item that is already exists")
+	}
+	r := atomic.LoadInt64(&a.readers)
+	switch {
+	case r == 0: // no readers, insert inplace
+		if cap(a.data) == len(a.data) { // not enough storage in array
+			goto copyCase
+		}
+		a.data = a.data[:len(a.data)+1]
+		copy(a.data[i+1:], a.data[i:])
+		a.data[i] = x
+	copyCase:
+		fallthrough
+	case r > 0: // readers exists, do copy
+		with := make([]int, len(a.data)+1)
+		copy(with[:i], a.data[:i])
+		copy(with[i+1:], a.data[i:])
+		with[i] = x
+		a.data = with
+	}
+	a.mu.Unlock()
+	return x
+}
+
 func (a *SyncArray) Upsert(x int) (prev int) {
 	a.mu.Lock()
 	// Binary search algorithm.
