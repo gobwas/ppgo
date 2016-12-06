@@ -191,6 +191,12 @@ func (a SortedArray) Reset() SortedArray {
 	return SortedArray{nil}
 }
 
+func (a SortedArray) Copy() []int {
+	ret := make([]int, len(a.data))
+	copy(ret, a.data)
+	return ret
+}
+
 func (a SortedArray) Len() int {
 	return len(a.data)
 }
