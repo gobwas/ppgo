@@ -169,9 +169,17 @@ func (a *STRUCT()) Do(cb func(SLICE(T))) {;;\
 };;\
 ;;\
 func (a *STRUCT()) Delete(x K) (T, bool) {;;\
+	return a.DeleteCond(x, nil);;\
+};;\
+;;\
+func (a *STRUCT()) DeleteCond(x K, predicate func(T) bool) (T, bool) {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, x, i, has);;\
 	if !has {;;\
+		a.mu.Unlock();;\
+		return EMPTY(), false;;\
+	};;\
+	if predicate != nil && !predicate(a.data[i]) {;;\
 		a.mu.Unlock();;\
 		return EMPTY(), false;;\
 	};;\

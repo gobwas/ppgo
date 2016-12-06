@@ -362,6 +362,10 @@ func (a *SyncArray) Do(cb func([]int)) {
 }
 
 func (a *SyncArray) Delete(x int) (int, bool) {
+	return a.DeleteCond(x, nil)
+}
+
+func (a *SyncArray) DeleteCond(x int, predicate func(int) bool) (int, bool) {
 	a.mu.Lock()
 	// Binary search algorithm.
 	var has bool
@@ -385,6 +389,10 @@ func (a *SyncArray) Delete(x int) (int, bool) {
 		_ = i // in case when i not being used
 	}
 	if !has {
+		a.mu.Unlock()
+		return 0, false
+	}
+	if predicate != nil && !predicate(a.data[i]) {
 		a.mu.Unlock()
 		return 0, false
 	}
