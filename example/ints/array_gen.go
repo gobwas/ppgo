@@ -187,6 +187,10 @@ func (a SortedArray) AscendRange(x, y int, cb func(x int) bool) bool {
 	return true
 }
 
+func (a SortedArray) Reset() SortedArray {
+	return SortedArray{nil}
+}
+
 func (a SortedArray) Len() int {
 	return len(a.data)
 }

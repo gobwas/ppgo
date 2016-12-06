@@ -72,6 +72,10 @@ func (a STRUCT()) AscendRange(x, y K, cb func(x T) bool) bool {;;\
 	return true;;\
 };;\
 ;;\
+func (a STRUCT()) Reset() (STRUCT()) {;;\
+	return STRUCT(){nil};;\
+};;\
+;;\
 func (a STRUCT()) Len() int {;;\
 	return len(a.data);;\
 };;\
