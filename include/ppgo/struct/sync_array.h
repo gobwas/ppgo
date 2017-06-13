@@ -137,26 +137,31 @@ func (a *STRUCT()) GetsertAnyFn(it func() (K, bool), factory func() T) T {;;\
 	return x;;\
 };;\
 ;;\
-func (a *STRUCT()) Upsert(x T) (prev T) {;;\
+>>> Upsert inserts item x into array or updates existing one.;;\
+>>> It returns previous item (if were present) and a boolean flag that reports;;\
+>>> about previous item replacement. This flag is useful for non-pointer item types;;\
+>>> such as numbers or struct values.;;\
+func (a *STRUCT()) Upsert(x T) (prev T, ok bool) {;;\
 	a.mu.Lock();;\
 	DO_SEARCH(a.data, ID(x), i, has);;\
 	r := atomic.LoadInt64(&a.readers);;\
 	switch {;;\
-	case r > 0 && has: >>> readers exists, do copy;;\
+	case r > 0 && has: >>> Readers exists, do copy.;;\
 		with := make(SLICE(T), len(a.data));;\
 		copy(with, a.data);;\
 		a.data = with;;\
 		fallthrough;;\
-	case r == 0 && has: >>> no readers: update in place;;\
+	case r == 0 && has: >>> No readers: update in place.;;\
 		a.data[i], prev = x, a.data[i];;\
+		ok = true;;\
 	case r == 0 && !has: >>> no readers, insert inplace;;\
-		if cap(a.data) == len(a.data) { >>> not enough storage in array;;\
+		if cap(a.data) == len(a.data) { >>> Not enough space to insert.;;\
 			goto copyCase;;\
 		};;\
 		INSERT_INPLACE(a.data, i, x);;\
 	copyCase:;;\
 		fallthrough;;\
-	case r > 0 && !has: >>> readers exists, do copy;;\
+	case r > 0 && !has: >>> Readers exists, do copy.;;\
 		INSERT_COPY(a.data, SLICE(T), i, x);;\
 	};;\
 	a.mu.Unlock();;\

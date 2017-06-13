@@ -60,7 +60,11 @@ func (a SortedArray) Get(x int) (int, bool) {
 	return a.data[i], true
 }
 
-func (a SortedArray) Upsert(x int) (cp SortedArray, prev int) {
+// Upsert inserts item x into array or updates existing one.
+// It returns copy of SortedArray, previous item (if were present) and a boolean
+// flag that reports about previous item replacement. This flag is useful for
+// non-pointer item types such as numbers or struct values.
+func (a SortedArray) Upsert(x int) (cp SortedArray, prev int, ok bool) {
 	var with []int
 	// Binary search algorithm.
 	var has bool
@@ -87,13 +91,15 @@ func (a SortedArray) Upsert(x int) (cp SortedArray, prev int) {
 		with = make([]int, len(a.data))
 		copy(with, a.data)
 		with[i], prev = x, a.data[i]
+		ok = true
 	} else {
 		with = make([]int, len(a.data)+1)
 		copy(with[:i], a.data[:i])
 		copy(with[i+1:], a.data[i:])
 		with[i] = x
+		prev = 0
 	}
-	return SortedArray{with}, prev
+	return SortedArray{with}, prev, ok
 }
 
 func (a SortedArray) Delete(x int) (SortedArray, int, bool) {

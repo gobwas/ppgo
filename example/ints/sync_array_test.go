@@ -6,7 +6,7 @@ import (
 )
 
 func TestSyncArrayGetAny(t *testing.T) {
-	for i, test := range []struct {
+	for _, test := range []struct {
 		data   []int
 		get    []int
 		expect int
@@ -19,7 +19,7 @@ func TestSyncArrayGetAny(t *testing.T) {
 			ok:     true,
 		},
 	} {
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+		t.Run("", func(t *testing.T) {
 			s := NewSyncArray()
 			for _, v := range test.data {
 				s.Upsert(v)

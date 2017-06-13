@@ -300,7 +300,11 @@ func (a *SyncArray) GetsertAnyFn(it func() (int, bool), factory func() int) int 
 	return x
 }
 
-func (a *SyncArray) Upsert(x int) (prev int) {
+// Upsert inserts item x into array or updates existing one.
+// It returns previous item (if were present) and a boolean flag that reports
+// about previous item replacement. This flag is useful for non-pointer item types
+// such as numbers or struct values.
+func (a *SyncArray) Upsert(x int) (prev int, ok bool) {
 	a.mu.Lock()
 	// Binary search algorithm.
 	var has bool
@@ -325,15 +329,16 @@ func (a *SyncArray) Upsert(x int) (prev int) {
 	}
 	r := atomic.LoadInt64(&a.readers)
 	switch {
-	case r > 0 && has: // readers exists, do copy
+	case r > 0 && has: // Readers exists, do copy.
 		with := make([]int, len(a.data))
 		copy(with, a.data)
 		a.data = with
 		fallthrough
-	case r == 0 && has: // no readers: update in place
+	case r == 0 && has: // No readers: update in place.
 		a.data[i], prev = x, a.data[i]
+		ok = true
 	case r == 0 && !has: // no readers, insert inplace
-		if cap(a.data) == len(a.data) { // not enough storage in array
+		if cap(a.data) == len(a.data) { // Not enough space to insert.
 			goto copyCase
 		}
 		a.data = a.data[:len(a.data)+1]
@@ -341,7 +346,7 @@ func (a *SyncArray) Upsert(x int) (prev int) {
 		a.data[i] = x
 	copyCase:
 		fallthrough
-	case r > 0 && !has: // readers exists, do copy
+	case r > 0 && !has: // Readers exists, do copy.
 		with := make([]int, len(a.data)+1)
 		copy(with[:i], a.data[:i])
 		copy(with[i+1:], a.data[i:])
