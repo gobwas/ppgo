@@ -90,5 +90,9 @@ func (a STRUCT()) Append(to SLICE(T)) SLICE(T) {;;\
 func (a STRUCT()) Len() int {;;\
 	return len(a.data);;\
 };;\
+;;\
+func (a STRUCT()) Cap() int {;;\
+	return cap(a.data);;\
+};;\
 
 #endif /* !_PPGO_STRUCT_ARRAY_ */

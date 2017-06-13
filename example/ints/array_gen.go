@@ -204,3 +204,7 @@ func (a SortedArray) Append(to []int) []int {
 func (a SortedArray) Len() int {
 	return len(a.data)
 }
+
+func (a SortedArray) Cap() int {
+	return cap(a.data)
+}
