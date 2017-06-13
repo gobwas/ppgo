@@ -197,8 +197,8 @@ func (a SortedArray) Reset() SortedArray {
 	return SortedArray{nil}
 }
 
-func (a SortedArray) Append(to []int) []int {
-	return append(to, a.data...)
+func (a SortedArray) AppendTo(p []int) []int {
+	return append(p, a.data...)
 }
 
 func (a SortedArray) Len() int {

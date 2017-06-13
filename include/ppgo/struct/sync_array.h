@@ -155,6 +155,11 @@ func (a *STRUCT()) Do(cb func(SLICE(T))) {;;\
 	cb(data);;\
 };;\
 ;;\
+func (a *STRUCT()) AppendTo(p SLICE(T)) SLICE(T) {;;\
+	READ_DATA(data);;\
+	return append(p, data...);;\
+};;\
+;;\
 func (a *STRUCT()) Delete(x K) (T, bool) {;;\
 	return a.DeleteCond(x, nil);;\
 };;\
@@ -239,7 +244,6 @@ func (a *STRUCT()) Len() int {;;\
 	copy(with[I+1:], DATA[I:]);;\
 	with[I] = X;;\
 	DATA = with\
-
 
 #define READ_DATA(DATA)\
 	a.mu.RLock();;\

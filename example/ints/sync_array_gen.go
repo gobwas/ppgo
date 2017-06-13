@@ -404,6 +404,15 @@ func (a *SyncArray) Do(cb func([]int)) {
 	cb(data)
 }
 
+func (a *SyncArray) AppendTo(p []int) []int {
+	a.mu.RLock()
+	data := a.data
+	atomic.AddInt64(&a.readers, 1)
+	defer atomic.AddInt64(&a.readers, -1)
+	a.mu.RUnlock()
+	return append(p, data...)
+}
+
 func (a *SyncArray) Delete(x int) (int, bool) {
 	return a.DeleteCond(x, nil)
 }

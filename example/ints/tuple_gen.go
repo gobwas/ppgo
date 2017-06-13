@@ -203,8 +203,8 @@ func (t Tuple) Reset() Tuple {
 	return t
 }
 
-func (t Tuple) Append(to []int) []int {
-	return append(to, t.data[:t.size]...)
+func (t Tuple) AppendTo(p []int) []int {
+	return append(p, t.data[:t.size]...)
 }
 
 func (t Tuple) Len() int {

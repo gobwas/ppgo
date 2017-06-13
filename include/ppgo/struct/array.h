@@ -83,8 +83,8 @@ func (a STRUCT()) Reset() STRUCT() {;;\
 	return STRUCT(){nil};;\
 };;\
 ;;\
-func (a STRUCT()) Append(to SLICE(T)) SLICE(T) {;;\
-	return append(to, a.data...);;\
+func (a STRUCT()) AppendTo(p SLICE(T)) SLICE(T) {;;\
+	return append(p, a.data...);;\
 };;\
 ;;\
 func (a STRUCT()) Len() int {;;\
