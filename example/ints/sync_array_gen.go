@@ -15,8 +15,10 @@ type SyncArray struct {
 	readers int64
 }
 
-func NewSyncArray() *SyncArray {
-	return &SyncArray{}
+func NewSyncArray(n int) *SyncArray {
+	return &SyncArray{
+		data: make([]int, 0, n),
+	}
 }
 
 func (a *SyncArray) Has(x int) bool {
@@ -150,17 +152,26 @@ func (a *SyncArray) Getsert(x int) int {
 	}
 	r := atomic.LoadInt64(&a.readers)
 	switch {
-	case r == 0: // no readers, insert inplace
-		if cap(a.data) == len(a.data) { // not enough storage in array
-			goto copyCase
+	case r == 0: // No readers, insert inplace.
+		if n := len(a.data); n == cap(a.data) {
+			// No space for insertion. Grow.
+			with := make([]int, len(a.data)+1, n*3/2+1)
+			copy(with[:i], a.data[:i])
+			copy(with[i+1:], a.data[i:])
+			with[i] = x
+			a.data = with
+		} else {
+			a.data = a.data[:len(a.data)+1]
+			copy(a.data[i+1:], a.data[i:])
+			a.data[i] = x
 		}
-		a.data = a.data[:len(a.data)+1]
-		copy(a.data[i+1:], a.data[i:])
-		a.data[i] = x
-	copyCase:
-		fallthrough
-	case r > 0: // readers exists, do copy
-		with := make([]int, len(a.data)+1)
+	case r > 0: // Readers exists, do copy.
+		grow := len(a.data) + 1
+		if n := len(a.data); n == cap(a.data) {
+			// No space for insertion. Grow.
+			grow = len(a.data)*3/2 + 1
+		}
+		with := make([]int, len(a.data)+1, grow)
 		copy(with[:i], a.data[:i])
 		copy(with[i+1:], a.data[i:])
 		with[i] = x
@@ -200,17 +211,26 @@ func (a *SyncArray) GetsertFn(k int, factory func() int) int {
 	x := factory()
 	r := atomic.LoadInt64(&a.readers)
 	switch {
-	case r == 0: // no readers, insert inplace
-		if cap(a.data) == len(a.data) { // not enough storage in array
-			goto copyCase
+	case r == 0: // No readers, insert inplace.
+		if n := len(a.data); n == cap(a.data) {
+			// No space for insertion. Grow.
+			with := make([]int, len(a.data)+1, n*3/2+1)
+			copy(with[:i], a.data[:i])
+			copy(with[i+1:], a.data[i:])
+			with[i] = x
+			a.data = with
+		} else {
+			a.data = a.data[:len(a.data)+1]
+			copy(a.data[i+1:], a.data[i:])
+			a.data[i] = x
 		}
-		a.data = a.data[:len(a.data)+1]
-		copy(a.data[i+1:], a.data[i:])
-		a.data[i] = x
-	copyCase:
-		fallthrough
-	case r > 0: // readers exists, do copy
-		with := make([]int, len(a.data)+1)
+	case r > 0: // Readers exists, do copy.
+		grow := len(a.data) + 1
+		if n := len(a.data); n == cap(a.data) {
+			// No space for insertion. Grow.
+			grow = len(a.data)*3/2 + 1
+		}
+		with := make([]int, len(a.data)+1, grow)
 		copy(with[:i], a.data[:i])
 		copy(with[i+1:], a.data[i:])
 		with[i] = x
@@ -280,17 +300,26 @@ func (a *SyncArray) GetsertAnyFn(it func() (int, bool), factory func() int) int 
 	}
 	r := atomic.LoadInt64(&a.readers)
 	switch {
-	case r == 0: // no readers, insert inplace
-		if cap(a.data) == len(a.data) { // not enough storage in array
-			goto copyCase
+	case r == 0: // No readers, insert inplace
+		if n := len(a.data); n == cap(a.data) {
+			// No space for insertion. Grow.
+			with := make([]int, len(a.data)+1, n*3/2+1)
+			copy(with[:i], a.data[:i])
+			copy(with[i+1:], a.data[i:])
+			with[i] = x
+			a.data = with
+		} else {
+			a.data = a.data[:len(a.data)+1]
+			copy(a.data[i+1:], a.data[i:])
+			a.data[i] = x
 		}
-		a.data = a.data[:len(a.data)+1]
-		copy(a.data[i+1:], a.data[i:])
-		a.data[i] = x
-	copyCase:
-		fallthrough
 	case r > 0: // readers exists, do copy
-		with := make([]int, len(a.data)+1)
+		grow := len(a.data) + 1
+		if n := len(a.data); n == cap(a.data) {
+			// No space for insertion. Grow.
+			grow = len(a.data)*3/2 + 1
+		}
+		with := make([]int, len(a.data)+1, grow)
 		copy(with[:i], a.data[:i])
 		copy(with[i+1:], a.data[i:])
 		with[i] = x
@@ -337,17 +366,26 @@ func (a *SyncArray) Upsert(x int) (prev int, ok bool) {
 	case r == 0 && has: // No readers: update in place.
 		a.data[i], prev = x, a.data[i]
 		ok = true
-	case r == 0 && !has: // no readers, insert inplace
-		if cap(a.data) == len(a.data) { // Not enough space to insert.
-			goto copyCase
+	case r == 0 && !has: // No readers, insert inplace
+		if n := len(a.data); n == cap(a.data) {
+			// No space for insertion. Grow.
+			with := make([]int, len(a.data)+1, n*3/2+1)
+			copy(with[:i], a.data[:i])
+			copy(with[i+1:], a.data[i:])
+			with[i] = x
+			a.data = with
+		} else {
+			a.data = a.data[:len(a.data)+1]
+			copy(a.data[i+1:], a.data[i:])
+			a.data[i] = x
 		}
-		a.data = a.data[:len(a.data)+1]
-		copy(a.data[i+1:], a.data[i:])
-		a.data[i] = x
-	copyCase:
-		fallthrough
 	case r > 0 && !has: // Readers exists, do copy.
-		with := make([]int, len(a.data)+1)
+		grow := len(a.data) + 1
+		if n := len(a.data); n == cap(a.data) {
+			// No space for insertion. Grow.
+			grow = len(a.data)*3/2 + 1
+		}
+		with := make([]int, len(a.data)+1, grow)
 		copy(with[:i], a.data[:i])
 		copy(with[i+1:], a.data[i:])
 		with[i] = x
@@ -404,10 +442,10 @@ func (a *SyncArray) DeleteCond(x int, predicate func(int) bool) (int, bool) {
 	prev := a.data[i]
 	r := atomic.LoadInt64(&a.readers)
 	switch {
-	case r == 0: // no readers, delete inplace
+	case r == 0: // No readers, delete inplace.
 		a.data[i] = 0
 		a.data = a.data[:i+copy(a.data[i:], a.data[i+1:])]
-	case r > 0: // has readers, copy
+	case r > 0: // Has readers, copy.
 		without := make([]int, len(a.data)-1)
 		copy(without[:i], a.data[:i])
 		copy(without[i:], a.data[i+1:])

@@ -20,7 +20,7 @@ func TestSyncArrayGetAny(t *testing.T) {
 		},
 	} {
 		t.Run("", func(t *testing.T) {
-			s := NewSyncArray()
+			s := NewSyncArray(0)
 			for _, v := range test.data {
 				s.Upsert(v)
 			}
@@ -53,7 +53,7 @@ func TestSyncArrayGetsertAny(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			s := NewSyncArray()
+			s := NewSyncArray(0)
 			for _, v := range test.data {
 				s.Upsert(v)
 			}

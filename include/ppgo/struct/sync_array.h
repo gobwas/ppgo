@@ -22,8 +22,10 @@ type STRUCT() struct {;;\
 	data SLICE(T);;\
 	readers int64;;\
 };;\
-func CTOR()() *STRUCT() {;;\
-	return &STRUCT(){};;\
+func CTOR()(n int) *STRUCT() {;;\
+	return &STRUCT(){;;\
+		data: make(SLICE(T), 0, n),;;\
+	};;\
 };;\
 ;;\
 func (a *STRUCT()) Has(x K) bool {;;\
@@ -65,14 +67,9 @@ func (a *STRUCT()) Getsert(x T) T {;;\
 	};;\
 	r := atomic.LoadInt64(&a.readers);;\
 	switch {;;\
-	case r == 0: >>> no readers, insert inplace;;\
-		if cap(a.data) == len(a.data) { >>> not enough storage in array;;\
-			goto copyCase;;\
-		};;\
-		INSERT_INPLACE(a.data, i, x);;\
-	copyCase:;;\
-		fallthrough;;\
-	case r > 0: >>> readers exists, do copy;;\
+	case r == 0: >>> No readers, insert inplace.;;\
+		INSERT_INPLACE(a.data, SLICE(T), i, x);;\
+	case r > 0: >>> Readers exists, do copy.;;\
 		INSERT_COPY(a.data, SLICE(T), i, x);;\
 	};;\
 	a.mu.Unlock();;\
@@ -89,14 +86,9 @@ func (a *STRUCT()) GetsertFn(k K, factory func() T) T {;;\
 	x := factory();;\
 	r := atomic.LoadInt64(&a.readers);;\
 	switch {;;\
-	case r == 0: >>> no readers, insert inplace;;\
-		if cap(a.data) == len(a.data) { >>> not enough storage in array;;\
-			goto copyCase;;\
-		};;\
-		INSERT_INPLACE(a.data, i, x);;\
-	copyCase:;;\
-		fallthrough;;\
-	case r > 0: >>> readers exists, do copy;;\
+	case r == 0: >>> No readers, insert inplace.;;\
+		INSERT_INPLACE(a.data, SLICE(T), i, x);;\
+	case r > 0: >>> Readers exists, do copy.;;\
 		INSERT_COPY(a.data, SLICE(T), i, x);;\
 	};;\
 	a.mu.Unlock();;\
@@ -123,13 +115,8 @@ func (a *STRUCT()) GetsertAnyFn(it func() (K, bool), factory func() T) T {;;\
 	};;\
 	r := atomic.LoadInt64(&a.readers);;\
 	switch {;;\
-	case r == 0: >>> no readers, insert inplace;;\
-		if cap(a.data) == len(a.data) { >>> not enough storage in array;;\
-			goto copyCase;;\
-		};;\
-		INSERT_INPLACE(a.data, i, x);;\
-	copyCase:;;\
-		fallthrough;;\
+	case r == 0: >>> No readers, insert inplace;;\
+		INSERT_INPLACE(a.data, SLICE(T), i, x);;\
 	case r > 0: >>> readers exists, do copy;;\
 		INSERT_COPY(a.data, SLICE(T), i, x);;\
 	};;\
@@ -154,13 +141,8 @@ func (a *STRUCT()) Upsert(x T) (prev T, ok bool) {;;\
 	case r == 0 && has: >>> No readers: update in place.;;\
 		a.data[i], prev = x, a.data[i];;\
 		ok = true;;\
-	case r == 0 && !has: >>> no readers, insert inplace;;\
-		if cap(a.data) == len(a.data) { >>> Not enough space to insert.;;\
-			goto copyCase;;\
-		};;\
-		INSERT_INPLACE(a.data, i, x);;\
-	copyCase:;;\
-		fallthrough;;\
+	case r == 0 && !has: >>> No readers, insert inplace;;\
+		INSERT_INPLACE(a.data, SLICE(T), i, x);;\
 	case r > 0 && !has: >>> Readers exists, do copy.;;\
 		INSERT_COPY(a.data, SLICE(T), i, x);;\
 	};;\
@@ -191,10 +173,10 @@ func (a *STRUCT()) DeleteCond(x K, predicate func(T) bool) (T, bool) {;;\
 	prev := a.data[i];;\
 	r := atomic.LoadInt64(&a.readers);;\
 	switch {;;\
-	case r == 0: >>> no readers, delete inplace;;\
+	case r == 0: >>> No readers, delete inplace.;;\
 		a.data[i] = EMPTY();;\
 		a.data = a.data[:i+copy(a.data[i:], a.data[i+1:])];;\
-	case r > 0: >>> has readers, copy;;\
+	case r > 0: >>> Has readers, copy.;;\
 		without := make(SLICE(T), len(a.data)-1);;\
 		copy(without[:i], a.data[:i]);;\
 		copy(without[i:], a.data[i+1:]);;\
@@ -233,17 +215,31 @@ func (a *STRUCT()) Len() int {;;\
 	return n;;\
 };;\
 
-#define INSERT_INPLACE(DATA, I, X)\
-	DATA = DATA[:len(DATA)+1];;\
-	copy(DATA[I+1:], DATA[I:]);;\
-	DATA[I] = X\
+#define INSERT_INPLACE(DATA, CONTAINER, I, X)\
+	if n := len(DATA); n == cap(DATA) { ;;\
+		>>> No space for insertion. Grow.;;\
+		DO_INSERT_COPY(DATA, CONTAINER, n*3/2 + 1, I, X);;\
+	} else {;;\
+		DATA = DATA[:len(DATA)+1];;\
+		copy(DATA[I+1:], DATA[I:]);;\
+		DATA[I] = X;;\
+	}\
 
 #define INSERT_COPY(DATA, CONTAINER, I, X)\
-	with := make(CONTAINER, len(DATA)+1);;\
+	grow := len(DATA) + 1;;\
+	if n := len(DATA); n == cap(DATA) {;;\
+		>>> No space for insertion. Grow.;;\
+		grow = len(DATA)*3/2 + 1;;\
+	};;\
+	DO_INSERT_COPY(DATA, CONTAINER, grow, I, X)\
+
+#define DO_INSERT_COPY(DATA, CONTAINER, GROW, I, X)\
+	with := make(CONTAINER, len(DATA)+1, GROW);;\
 	copy(with[:I], DATA[:I]);;\
 	copy(with[I+1:], DATA[I:]);;\
 	with[I] = X;;\
 	DATA = with\
+
 
 #define READ_DATA(DATA)\
 	a.mu.RLock();;\
