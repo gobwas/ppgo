@@ -9,10 +9,10 @@
 #define _PPGO_STRUCT_TUPLE_
 
 #define MAKE_TUPLE(N, T, K);;\
-const VAR(TupleCapacity) = N;;\
+const VAR(Capacity) = N;;\
 ;;\
 type STRUCT() struct {;;\
-	data ARRAY(N, T);;\
+	data ARRAY(VAR(Capacity), T);;\
 	size int;;\
 };;\
 ;;\
@@ -97,7 +97,7 @@ func (t STRUCT()) Len() int {;;\
 };;\
 ;;\
 func (t STRUCT()) Cap() int {;;\
-	return N - t.size;;\
+	return VAR(Capacity) - t.size;;\
 };;\
 ;;\
 

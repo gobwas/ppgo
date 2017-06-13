@@ -3,10 +3,10 @@
 
 package ints
 
-const TupleTupleCapacity = 8
+const TupleCapacity = 8
 
 type Tuple struct {
-	data [8]int
+	data [TupleCapacity]int
 	size int
 }
 
@@ -212,5 +212,5 @@ func (t Tuple) Len() int {
 }
 
 func (t Tuple) Cap() int {
-	return 8 - t.size
+	return TupleCapacity - t.size
 }
