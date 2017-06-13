@@ -3,7 +3,7 @@
 
 package ints
 
-const TupleCapacity = 8
+const TupleTupleCapacity = 8
 
 type Tuple struct {
 	data [8]int

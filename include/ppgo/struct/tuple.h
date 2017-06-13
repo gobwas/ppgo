@@ -9,7 +9,7 @@
 #define _PPGO_STRUCT_TUPLE_
 
 #define MAKE_TUPLE(N, T, K);;\
-const VAR(Capacity) = N;;\
+const VAR(TupleCapacity) = N;;\
 ;;\
 type STRUCT() struct {;;\
 	data ARRAY(N, T);;\
