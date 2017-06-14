@@ -13,7 +13,7 @@ type Array struct {
 // NewArray creates Array with underlying sorted copy of given data.
 func NewArray(data []int) Array {
 	a := Array{}
-	a.size = copy(a.data, data)
+	a.size = copy(a.data[:], data)
 	a.sort(0, a.size)
 	return a
 }
@@ -44,10 +44,10 @@ func (a *Array) sort(lo, hi int) {
 	a.data[p], a.data[lo] = a.data[lo], a.data[p]
 
 	if lo < p {
-		a.sort(data, lo, p)
+		a.sort(a.data, lo, p)
 	}
 	if p+1 < hi {
-		a.sort(data, p+1, hi)
+		a.sort(a.data, p+1, hi)
 	}
 }
 

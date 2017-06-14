@@ -18,7 +18,7 @@ type STRUCT() struct {;;\
 >>> CTOR() creates STRUCT() with underlying sorted copy of given data.;;\
 func CTOR()(data SLICE(T)) STRUCT() {;;\
 	a := STRUCT(){};;\
-	a.size = copy(a.data, data);;\
+	a.size = copy(a.data[:], data);;\
 	a.sort(0, a.size);;\
 	return a;;\
 };;\

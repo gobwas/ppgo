@@ -39,10 +39,10 @@
 #define MK_QUICK_SORT(REC, DATA, L, R)\
 	DO_PARTITION(DATA, L, R, p);;\
 	if L < p {;;\
-		REC(data, L, p);;\
+		REC(DATA, L, p);;\
 	};;\
 	if p+1 < R {;;\
-		REC(data, p+1, R);;\
+		REC(DATA, p+1, R);;\
 	}\
 
 #define DO_PARTITION(DATA, L, R, PIVOT)\
