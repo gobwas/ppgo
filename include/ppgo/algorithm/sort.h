@@ -12,15 +12,22 @@
 		return i, ok;;\
 	};;;;\
 
-#define MK_SORT(REC, DATA, L, R)\
+#define MK_INSERTION_CHECK(DATA, L, R)\
 	if R-L <= 12 {;;\
 		>>> Do insertion sort.;;\
 		DO_INSERTION_SORT(DATA, L, R);;\
 		return;;\
 	};;\
-	>>> Do quick sort.;;\
-	MK_QUICK_SORT(REC, DATA, L, R)\
 
+#define MK_SORT(REC, DATA, L, R)\
+	MK_INSERTION_CHECK(DATA, L, R)\
+	>>> Do quick sort.;;\
+	MK_QUICK_SORT_REC(REC, DATA, L, R)\
+
+#define MK_SORT_SELF(REC, DATA, L, R)\
+	MK_INSERTION_CHECK(DATA, L, R)\
+	>>> Do quick sort.;;\
+	MK_QUICK_SORT_SELF(REC, DATA, L, R)\
 
 #define DO_INSERTION_SORT(DATA, L, R)\
 	for i := L + 1;; i < R;; i++ {;;\
@@ -29,20 +36,22 @@
 		};;\
 	}\
 
-#define DO_QUICK_SORT(T, DATA, L, R)\
-	var qs func(SLICE(T), int, int);;\
-	qs = func (data SLICE(T), lo, hi int) {;;\
-		MK_QUICK_SORT(qs, data, lo, hi);;\
-	};;\
-	qs(DATA, L, R);;\
-
-#define MK_QUICK_SORT(REC, DATA, L, R)\
+#define MK_QUICK_SORT_REC(REC, DATA, L, R)\
 	DO_PARTITION(DATA, L, R, p);;\
 	if L < p {;;\
 		REC(DATA, L, p);;\
 	};;\
 	if p+1 < R {;;\
 		REC(DATA, p+1, R);;\
+	}\
+
+#define MK_QUICK_SORT_SELF(REC, DATA, L, R)\
+	DO_PARTITION(DATA, L, R, p);;\
+	if L < p {;;\
+		REC(L, p);;\
+	};;\
+	if p+1 < R {;;\
+		REC(p+1, R);;\
 	}\
 
 #define DO_PARTITION(DATA, L, R, PIVOT)\

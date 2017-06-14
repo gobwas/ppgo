@@ -44,10 +44,10 @@ func (a *Array) sort(lo, hi int) {
 	a.data[p], a.data[lo] = a.data[lo], a.data[p]
 
 	if lo < p {
-		a.sort(a.data, lo, p)
+		a.sort(lo, p)
 	}
 	if p+1 < hi {
-		a.sort(a.data, p+1, hi)
+		a.sort(p+1, hi)
 	}
 }
 

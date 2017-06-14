@@ -26,7 +26,7 @@ func CTOR()(data SLICE(T)) STRUCT() {;;\
 >>> sort sorts data for further use. It is intended to be;;\
 >>> used only once in CTOR().;;\
 func (a *STRUCT()) sort(lo, hi int) {\
-	MK_SORT(a.sort, a.data, lo, hi);;\
+	MK_SORT_SELF(a.sort, a.data, lo, hi);;\
 };;\
 ;;\
 func (a *STRUCT()) Has(x K) bool {;;\
