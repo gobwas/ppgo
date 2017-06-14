@@ -8,32 +8,76 @@ import (
 	"testing"
 )
 
+var sorters = []struct {
+	label  string
+	sorter func([]int, int, int)
+}{
+	{"ppgo", Sort},
+	{"std", stdSort},
+}
+
+var sortFixtures = []struct {
+	in  []int
+	exp []int
+}{
+	{
+		in:  []int{7, 0, 1, -1, 3},
+		exp: []int{-1, 0, 1, 3, 7},
+	},
+	{
+		in:  rand.Perm(10),
+		exp: seq(10),
+	},
+	{
+		in:  rand.Perm(50),
+		exp: seq(50),
+	},
+	{
+		in:  rand.Perm(100),
+		exp: seq(100),
+	},
+	{
+		in:  rand.Perm(1000),
+		exp: seq(1000),
+	},
+}
+
 func TestSort(t *testing.T) {
-	for i, test := range []struct {
-		before []int
-		after  []int
-	}{
-		{
-			before: []int{3, 2, 1, 0},
-			after:  []int{0, 1, 2, 3},
-		},
-		{
-			before: []int{0, -1, -2, -3},
-			after:  []int{-3, -2, -1, 0},
-		},
-		{
-			before: []int{},
-			after:  []int{},
-		},
-	} {
-		t.Run(fmt.Sprintf("[%d]", i), func(t *testing.T) {
-			s := make([]int, len(test.before))
-			copy(s, test.before)
-			Sort(s, 0, len(s))
-			if !reflect.DeepEqual(s, test.after) {
-				t.Errorf("Sort(%v) ~> %v; want %v", test.before, s, test.after)
+	for _, test := range sortFixtures {
+		t.Run(fmt.Sprintf("%d", len(test.in)), func(t *testing.T) {
+			act := copySet(test.in)
+			Sort(act, 0, len(test.in))
+			if !reflect.DeepEqual(act, test.exp) {
+				t.Errorf("Sort(%v) = %v; want %v", test.in, act, test.exp)
 			}
 		})
+	}
+}
+
+func BenchmarkSort(b *testing.B) {
+	for _, s := range sorters {
+		for _, test := range sortFixtures {
+			b.Run(fmt.Sprintf("%s(%d)", s.label, len(test.in)), func(b *testing.B) {
+				data := make([][]int, 1000)
+				for i := range data {
+					data[i] = copySet(test.in)
+				}
+
+				b.ResetTimer()
+				for i := 0; i < b.N; i++ {
+					j := i % 1000
+					if j == 0 {
+						b.StopTimer()
+						for i := range data {
+							copy(data[i], test.in)
+						}
+						b.StartTimer()
+					}
+
+					s.sorter(data[j], 0, len(data[j]))
+				}
+			})
+		}
 	}
 }
 
@@ -69,62 +113,6 @@ func TestSearch(t *testing.T) {
 	}
 }
 
-func BenchmarkSort(b *testing.B) {
-	for _, bench := range []struct {
-		label string
-		size  int
-		fn    func([]int, int, int)
-	}{
-		{
-			label: "ppgo",
-			size:  10,
-			fn:    Sort,
-		},
-		{
-			label: "ppgo",
-			size:  100,
-			fn:    Sort,
-		},
-		{
-			label: "ppgo",
-			size:  1000,
-			fn:    Sort,
-		},
-		{
-			label: "golang",
-			size:  10,
-			fn:    func(data []int, l, r int) { sort.Ints(data) },
-		},
-		{
-			label: "golang",
-			size:  100,
-			fn:    func(data []int, l, r int) { sort.Ints(data) },
-		},
-		{
-			label: "golang",
-			size:  1000,
-			fn:    func(data []int, l, r int) { sort.Ints(data) },
-		},
-	} {
-		b.Run(fmt.Sprintf("%s_%d", bench.label, bench.size), func(b *testing.B) {
-			b.StopTimer()
-			data := make([]int, bench.size)
-			for i := 0; i < len(data); i++ {
-				data[i] = i
-			}
-			for i := 0; i < b.N; i++ {
-				for j := 0; j < len(data); j++ {
-					k := rand.Intn(j + 1)
-					data[j], data[k] = data[k], data[j]
-				}
-				b.StartTimer()
-				bench.fn(data, 0, len(data))
-				b.StopTimer()
-			}
-		})
-	}
-}
-
 func BenchmarkSearch(b *testing.B) {
 	for _, bench := range []struct {
 		label string
@@ -155,4 +143,20 @@ func BenchmarkSearch(b *testing.B) {
 			}
 		})
 	}
+}
+
+func copySet(data []int) []int {
+	return append(([]int)(nil), data...)
+}
+
+func stdSort(data []int, lo, hi int) {
+	sort.Ints(data)
+}
+
+func seq(n int) []int {
+	data := make([]int, n)
+	for i := 0; i < n; i++ {
+		data[i] = i
+	}
+	return data
 }

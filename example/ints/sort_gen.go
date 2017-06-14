@@ -3,47 +3,34 @@
 
 package ints
 
-func QuickSort(data []int, lo, hi int) {
-	if lo >= hi {
-		return
-	}
-	// Quick sort partition algorithm.
-	var p int
-	{
-		// Let x be a pivot
-		x := data[lo]
-		p = lo
+func Sort(data []int, lo, hi int) {
+	if hi-lo <= 12 {
+		// Do insertion sort.
 		for i := lo + 1; i < hi; i++ {
-			if data[i] <= x {
-				p++
-				data[p], data[i] = data[i], data[p]
+			for j := i; j > lo && !(data[j-1] <= data[j]); j-- {
+				data[j], data[j-1] = data[j-1], data[j]
 			}
 		}
-		data[p], data[lo] = data[lo], data[p]
-	}
-	QuickSort(data, lo, p)
-	QuickSort(data, p+1, hi)
-}
-
-func InsertionSort(data []int, l, r int) {
-	// Insertion sort algorithm.
-	for i := l + 1; i < r; i++ {
-		for j := i; j > l && !(data[j-1] <= data[j]); j-- {
-			data[j], data[j-1] = data[j-1], data[j]
-		}
-	}
-}
-
-func Sort(data []int, l, r int) {
-	if r-l > 12 {
-		QuickSort(data, l, r)
 		return
 	}
-	// Insertion sort algorithm.
-	for i := l + 1; i < r; i++ {
-		for j := i; j > l && !(data[j-1] <= data[j]); j-- {
-			data[j], data[j-1] = data[j-1], data[j]
+	// Do quick sort.
+	var (
+		p = lo
+		x = data[lo]
+	)
+	for i := lo + 1; i < hi; i++ {
+		if data[i] <= x {
+			p++
+			data[p], data[i] = data[i], data[p]
 		}
+	}
+	data[p], data[lo] = data[lo], data[p]
+
+	if lo < p {
+		Sort(data, lo, p)
+	}
+	if p+1 < hi {
+		Sort(data, p+1, hi)
 	}
 }
 

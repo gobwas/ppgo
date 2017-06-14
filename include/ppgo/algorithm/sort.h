@@ -4,55 +4,62 @@
 #define	_PPGO_ALGORITHM_SORT_
 
 #define MAKE_SORT(T, K);;\
-	func FUNC(QuickSort)(data SLICE(T), lo, hi int) {;;\
-		if lo >= hi {;;\
-			return;;\
-		};;\
-		DO_PARTITION(data, lo, hi, p);;\
-		FUNC(QuickSort)(data, lo, p);;\
-		FUNC(QuickSort)(data, p+1, hi);;\
-	};;;;\
-	func FUNC(InsertionSort)(data SLICE(T), l, r int) {;;\
-		DO_INSERTION_SORT(data, l, r)\
-	};;;;\
-	func FUNC(Sort)(data SLICE(T), l, r int) {;;\
-		if r-l > 12 {;;\
-			FUNC(QuickSort)(data, l, r);;\
-			return;;\
-		};;\
-		DO_INSERTION_SORT(data, l, r);;\
+	func FUNC(Sort)(data SLICE(T), lo, hi int) {;;\
+		MK_SORT(FUNC(Sort), data, lo, hi);;\
 	};;;;\
 	func FUNC(Search)(data SLICE(T), key K) (int, bool) {;;\
 		DO_SEARCH(data, key, i, ok);;\
 		return i, ok;;\
 	};;;;\
 
-#define DO_SWAP(DATA, A, B)\
-	DATA[A], DATA[B] = DATA[B], DATA[A]\
+#define MK_SORT(REC, DATA, L, R)\
+	if R-L <= 12 {;;\
+		>>> Do insertion sort.;;\
+		DO_INSERTION_SORT(DATA, L, R);;\
+		return;;\
+	};;\
+	>>> Do quick sort.;;\
+	MK_QUICK_SORT(REC, DATA, L, R)\
 
-#define DO_PARTITION(DATA, L, R, PIVOT)\
-	>>> Quick sort partition algorithm.;;\
-	var PIVOT int;;\
-	{;;\
-		>>> Let x be a pivot;;\
-		x := DATA[L];;\
-		PIVOT = L;;\
-		for i := L + 1; i < R; i++ {;;\
-			if LESS_OR_EQUAL(DATA[i], x) {;;\
-				PIVOT++;;\
-				DO_SWAP(DATA, PIVOT, i);;\
-			};;\
-		};;\
-		DO_SWAP(DATA, PIVOT, L);;\
-	}\
 
 #define DO_INSERTION_SORT(DATA, L, R)\
-	>>> Insertion sort algorithm.;;\
 	for i := L + 1;; i < R;; i++ {;;\
 		for j := i;; j > L && !(LESS_OR_EQUAL(DATA[j-1], DATA[j]));; j-- {;;\
 			DO_SWAP(DATA, j, j-1);;\
 		};;\
 	}\
+
+#define DO_QUICK_SORT(T, DATA, L, R)\
+	var qs func(SLICE(T), int, int);;\
+	qs = func (data SLICE(T), lo, hi int) {;;\
+		MK_QUICK_SORT(qs, data, lo, hi);;\
+	};;\
+	qs(DATA, L, R);;\
+
+#define MK_QUICK_SORT(REC, DATA, L, R)\
+	DO_PARTITION(DATA, L, R, p);;\
+	if L < p {;;\
+		REC(data, L, p);;\
+	};;\
+	if p+1 < R {;;\
+		REC(data, p+1, R);;\
+	}\
+
+#define DO_PARTITION(DATA, L, R, PIVOT)\
+	var (;;\
+		PIVOT = L;;\
+		x = DATA[L];;\
+	);;\
+	for i := L + 1; i < R; i++ {;;\
+		if LESS_OR_EQUAL(DATA[i], x) {;;\
+			PIVOT++;;\
+			DO_SWAP(DATA, PIVOT, i);;\
+		};;\
+	};;\
+	DO_SWAP(DATA, PIVOT, L);;\
+
+#define DO_SWAP(DATA, A, B)\
+	DATA[A], DATA[B] = DATA[B], DATA[A]\
 
 #define DO_SEARCH_RANGE(DATA, KEY, LEFT, RIGHT, RESULT, OK)\
 	>>> Binary search algorithm.;;\

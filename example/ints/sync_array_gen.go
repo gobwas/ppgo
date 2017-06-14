@@ -21,6 +21,47 @@ func NewSyncArray(n int) *SyncArray {
 	}
 }
 
+// NewSyncArrayFromSlice creates SyncArray with src as underlying data.
+// Note that src is not copied and used by reference.
+func NewSyncArrayFromSlice(data []int) *SyncArray {
+	sortSyncArraySource(data, 0, len(data))
+	return &SyncArray{
+		data: data,
+	}
+}
+
+// sortSyncArraySource sorts data for further use inside SyncArray.
+func sortSyncArraySource(data []int, lo, hi int) {
+	if hi-lo <= 12 {
+		// Do insertion sort.
+		for i := lo + 1; i < hi; i++ {
+			for j := i; j > lo && !(data[j-1] <= data[j]); j-- {
+				data[j], data[j-1] = data[j-1], data[j]
+			}
+		}
+		return
+	}
+	// Do quick sort.
+	var (
+		p = lo
+		x = data[lo]
+	)
+	for i := lo + 1; i < hi; i++ {
+		if data[i] <= x {
+			p++
+			data[p], data[i] = data[i], data[p]
+		}
+	}
+	data[p], data[lo] = data[lo], data[p]
+
+	if lo < p {
+		sortSyncArraySource(data, lo, p)
+	}
+	if p+1 < hi {
+		sortSyncArraySource(data, p+1, hi)
+	}
+}
+
 func (a *SyncArray) Has(x int) bool {
 	a.mu.RLock()
 	data := a.data

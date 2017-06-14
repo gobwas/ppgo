@@ -28,6 +28,20 @@ func CTOR()(n int) *STRUCT() {;;\
 	};;\
 };;\
 ;;\
+>>> CONCAT(CTOR(), FromSlice) creates STRUCT() with src as underlying data.;;\
+>>> Note that src is not copied and used by reference.;;\
+func CONCAT(CTOR(), FromSlice)(data SLICE(T)) *STRUCT() {;;\
+	CONCAT(CONCAT(sort, STRUCT()), Source)(data, 0, len(data));;\
+	return &STRUCT(){;;\
+		data: data,;;\
+	};;\
+};;\
+;;\
+>>> CONCAT(CONCAT(sort, STRUCT()), Source) sorts data for further use inside STRUCT().;;\
+func CONCAT(CONCAT(sort, STRUCT()), Source)(data SLICE(T), lo, hi int) {\
+	MK_SORT(CONCAT(CONCAT(sort, STRUCT()), Source), data, lo, hi);;\
+};;\
+;;\
 func (a *STRUCT()) Has(x K) bool {;;\
 	READ_DATA(data);;\
 	DO_SEARCH(data, x, i, ok);;\
