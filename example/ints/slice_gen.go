@@ -3,20 +3,56 @@
 
 package ints
 
-const ArrayCapacity = 8
-
-type Array struct {
-	data [ArrayCapacity]int
-	size int
+type SortedSlice struct {
+	data []int
 }
 
-func (a Array) Has(x int) bool {
+// NewSortedSlice creates SortedSlice with underlying data.
+// Note that data is not copied and used by reference.
+func NewSortedSlice(data []int) SortedSlice {
+	_SortedSliceSortSource(data, 0, len(data))
+	return SortedSlice{data: data}
+}
+
+// _SortedSliceSortSource sorts data for further use inside SortedSlice.
+func _SortedSliceSortSource(data []int, lo, hi int) {
+	if hi-lo <= 12 {
+		// Do insertion sort.
+		for i := lo + 1; i < hi; i++ {
+			for j := i; j > lo && !(data[j-1] <= data[j]); j-- {
+				data[j], data[j-1] = data[j-1], data[j]
+			}
+		}
+		return
+	}
+	// Do quick sort.
+	var (
+		p = lo
+		x = data[lo]
+	)
+	for i := lo + 1; i < hi; i++ {
+		if data[i] <= x {
+			p++
+			data[p], data[i] = data[i], data[p]
+		}
+	}
+	data[p], data[lo] = data[lo], data[p]
+
+	if lo < p {
+		_SortedSliceSortSource(data, lo, p)
+	}
+	if p+1 < hi {
+		_SortedSliceSortSource(data, p+1, hi)
+	}
+}
+
+func (a SortedSlice) Has(x int) bool {
 	// Binary search algorithm.
 	var ok bool
 	var i int
 	{
 		l := 0
-		r := a.size
+		r := len(a.data)
 		for !ok && l < r {
 			m := l + (r-l)/2
 			switch {
@@ -35,13 +71,13 @@ func (a Array) Has(x int) bool {
 	return ok
 }
 
-func (a Array) Get(x int) (int, bool) {
+func (a SortedSlice) Get(x int) (int, bool) {
 	// Binary search algorithm.
 	var ok bool
 	var i int
 	{
 		l := 0
-		r := a.size
+		r := len(a.data)
 		for !ok && l < r {
 			m := l + (r-l)/2
 			switch {
@@ -64,18 +100,17 @@ func (a Array) Get(x int) (int, bool) {
 }
 
 // Upsert inserts item x into array or updates existing one.
-// It returns copy of Array, previous item (if were present) and a boolean
+// It returns copy of SortedSlice, previous item (if were present) and a boolean
 // flag that reports about previous item replacement. This flag is useful for
 // non-pointer item types such as numbers or struct values.
-//
-// Note that it will panic on out of range insertion.
-func (a Array) Upsert(x int) (cp Array, prev int, ok bool) {
+func (a SortedSlice) Upsert(x int) (cp SortedSlice, prev int, ok bool) {
+	var with []int
 	// Binary search algorithm.
 	var has bool
 	var i int
 	{
 		l := 0
-		r := a.size
+		r := len(a.data)
 		for !has && l < r {
 			m := l + (r-l)/2
 			switch {
@@ -92,24 +127,27 @@ func (a Array) Upsert(x int) (cp Array, prev int, ok bool) {
 		_ = i // in case when i not being used
 	}
 	if has {
-		a.data[i], prev = x, a.data[i]
+		with = make([]int, len(a.data))
+		copy(with, a.data)
+		with[i], prev = x, a.data[i]
 		ok = true
 	} else {
-		a.size++
-		copy(a.data[i+1:a.size], a.data[i:a.size-1])
-		a.data[i] = x
+		with = make([]int, len(a.data)+1)
+		copy(with[:i], a.data[:i])
+		copy(with[i+1:], a.data[i:])
+		with[i] = x
 		prev = 0
 	}
-	return t, prev, ok
+	return SortedSlice{with}, prev, ok
 }
 
-func (a Array) Delete(x int) (cp Array, prev int, ok bool) {
+func (a SortedSlice) Delete(x int) (SortedSlice, int, bool) {
 	// Binary search algorithm.
 	var has bool
 	var i int
 	{
 		l := 0
-		r := a.size
+		r := len(a.data)
 		for !has && l < r {
 			m := l + (r-l)/2
 			switch {
@@ -126,30 +164,30 @@ func (a Array) Delete(x int) (cp Array, prev int, ok bool) {
 		_ = i // in case when i not being used
 	}
 	if !has {
-		return t, 0, false
+		return a, 0, false
 	}
-	a.size--
-	prev = a.data[i]
-	copy(a.data[i:a.size], a.data[i+1:a.size+1])
-	return t, prev, true
+	without := make([]int, len(a.data)-1)
+	copy(without[:i], a.data[:i])
+	copy(without[i:], a.data[i+1:])
+	return SortedSlice{without}, a.data[i], true
 }
 
-func (a Array) Ascend(cb func(x int) bool) bool {
-	for i := 0; i < a.size; i++ {
-		if !cb(a.data[i]) {
+func (a SortedSlice) Ascend(cb func(x int) bool) bool {
+	for _, x := range a.data {
+		if !cb(x) {
 			return false
 		}
 	}
 	return true
 }
 
-func (a Array) AscendRange(x, y int, cb func(x int) bool) bool {
+func (a SortedSlice) AscendRange(x, y int, cb func(x int) bool) bool {
 	// Binary search algorithm.
 	var hasX bool
 	var i int
 	{
 		l := 0
-		r := a.size
+		r := len(a.data)
 		for !hasX && l < r {
 			m := l + (r-l)/2
 			switch {
@@ -170,7 +208,7 @@ func (a Array) AscendRange(x, y int, cb func(x int) bool) bool {
 	var j int
 	{
 		l := i
-		r := a.size
+		r := len(a.data)
 		for !hasY && l < r {
 			m := l + (r-l)/2
 			switch {
@@ -186,7 +224,7 @@ func (a Array) AscendRange(x, y int, cb func(x int) bool) bool {
 		j = r
 		_ = j // in case when j not being used
 	}
-	for ; i < a.size && i <= j; i++ {
+	for ; i < len(a.data) && i <= j; i++ {
 		if !cb(a.data[i]) {
 			return false
 		}
@@ -194,23 +232,18 @@ func (a Array) AscendRange(x, y int, cb func(x int) bool) bool {
 	return true
 }
 
-func (a Array) Reset() Array {
-	for i := 0; i < a.size; i++ {
-		// Need to prevent memory leaks on complex structs.
-		a.data[i] = 0
-	}
-	a.size = 0
-	return t
+func (a SortedSlice) Reset() SortedSlice {
+	return SortedSlice{nil}
 }
 
-func (a Array) AppendTo(p []int) []int {
-	return append(p, a.data[:a.size]...)
+func (a SortedSlice) AppendTo(p []int) []int {
+	return append(p, a.data...)
 }
 
-func (a Array) Len() int {
-	return a.size
+func (a SortedSlice) Len() int {
+	return len(a.data)
 }
 
-func (a Array) Cap() int {
-	return ArrayCapacity - a.size
+func (a SortedSlice) Cap() int {
+	return cap(a.data)
 }

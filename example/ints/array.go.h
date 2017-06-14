@@ -2,10 +2,10 @@
 
 #define ID(a) a
 #define LESS_OR_EQUAL(a, b) a <= b
-#define FUNC(a) a
-#define STRUCT(a) SortedArray
+#define STRUCT(a) Array
+#define VAR(a) CONCAT(Array, a)
 #define EMPTY() 0
 
 package ints
 
-MAKE_ARRAY(int, int)
+MAKE_SORTED_ARRAY(8, int, int)

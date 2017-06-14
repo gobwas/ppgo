@@ -1,67 +1,66 @@
 #include "ppgo/algorithm/sort.h"
 
 /**
- * This file contains an implementation of immutable sorted array with go's
- * slice as a backend.
+ * This file contains an implementation of immutable sorted array.
  */
 
-#ifndef _PPGO_STRUCT_ARRAY_
-#define	_PPGO_STRUCT_ARRAY_
+#ifndef _PPGO_STRUCT_SORTED_ARRAY_
+#define _PPGO_STRUCT_SORTED_ARRAY_
 
-#define MAKE_ARRAY(T, K);;\
+#define MAKE_SORTED_ARRAY(N, T, K);;\
+const VAR(Capacity) = N;;\
+;;\
 type STRUCT() struct {;;\
-	data SLICE(T);;\
+	data ARRAY(VAR(Capacity), T);;\
+	size int;;\
 };;\
 ;;\
 func (a STRUCT()) Has(x K) bool {;;\
-	DO_SEARCH(a.data, ID(x), i, ok);;\
+	DO_SEARCH_RANGE(a.data, x, 0, a.size, i, ok);;\
 	return ok;;\
 };;\
 ;;\
 func (a STRUCT()) Get(x K) (T, bool) {;;\
-	DO_SEARCH(a.data, ID(x), i, ok);;\
+	DO_SEARCH_RANGE(a.data, x, 0, a.size, i, ok);;\
 	if !ok {;;\
 		return EMPTY(), false;;\
 	};;\
 	return a.data[i], true;;\
 };;\
-;;\
 >>> Upsert inserts item x into array or updates existing one.;;\
 >>> It returns copy of STRUCT(), previous item (if were present) and a boolean;;\
 >>> flag that reports about previous item replacement. This flag is useful for;;\
 >>> non-pointer item types such as numbers or struct values.;;\
+>>> ;;\
+>>> Note that it will panic on out of range insertion.;;\
 func (a STRUCT()) Upsert(x T) (cp STRUCT(), prev T, ok bool) {;;\
-	var with SLICE(T);;\
-	DO_SEARCH(a.data, ID(x), i, has);;\
+	DO_SEARCH_RANGE(a.data, ID(x), 0, a.size, i, has);;\
 	if has {;;\
-		with = make(SLICE(T), len(a.data));;\
-		copy(with, a.data);;\
-		with[i], prev = x, a.data[i];;\
+		a.data[i], prev = x, a.data[i];;\
 		ok = true;;\
 	} else {;;\
-		with = make(SLICE(T), len(a.data)+1);;\
-		copy(with[:i], a.data[:i]);;\
-		copy(with[i+1:], a.data[i:]);;\
-		with[i] = x;;\
+		a.size++;;\
+		copy(a.data[i+1:a.size], a.data[i:a.size-1]);;\
+		a.data[i] = x;;\
 		prev = EMPTY();;\
 	};;\
-	return STRUCT(){with}, prev, ok;;\
+	return t, prev, ok;;\
 };;\
 ;;\
-func (a STRUCT()) Delete(x K) (STRUCT(), T, bool) {;;\
-	DO_SEARCH(a.data, ID(x), i, has);;\
+func (a STRUCT()) Delete(x K) (cp STRUCT(), prev T, ok bool) {;;\
+	DO_SEARCH_RANGE(a.data, ID(x), 0, a.size, i, has);;\
 	if !has {;;\
-		return a, EMPTY(), false;\
+		return t, EMPTY(), false;\
 	};;\
-	without := make(SLICE(T), len(a.data)-1);;\
-	copy(without[:i], a.data[:i]);;\
-	copy(without[i:], a.data[i+1:]);;\
-	return STRUCT(){without}, a.data[i], true;;\
+	a.size--;;\
+	prev = a.data[i];;\
+	copy(a.data[i:a.size], a.data[i+1:a.size+1]);;\
+	return t, prev, true;;\
 };;\
 ;;\
 func (a STRUCT()) Ascend(cb func(x T) bool) bool {;;\
-	for _, x := range a.data {;;\
-		if !cb(x) {;;\
+	for i := 0; i < a.size; i++ {;;\
+		if !cb(a.data[i]) {;;\
 			return false;;\
 		};;\
 	};;\
@@ -69,9 +68,9 @@ func (a STRUCT()) Ascend(cb func(x T) bool) bool {;;\
 };;\
 ;;\
 func (a STRUCT()) AscendRange(x, y K, cb func(x T) bool) bool {;;\
-	DO_SEARCH_RANGE(a.data, ID(x), 0, len(a.data), i, hasX);;\
-	DO_SEARCH_RANGE(a.data, ID(y), i, len(a.data), j, hasY);;\
-	for ; i < len(a.data) && i <= j; i++ {;;\
+	DO_SEARCH_RANGE(a.data, x, 0, a.size, i, hasX);;\
+	DO_SEARCH_RANGE(a.data, y, i, a.size, j, hasY);;\
+	for ; i < a.size && i <= j; i++ {;;\
 		if !cb(a.data[i]) {;;\
 			return false;;\
 		};;\
@@ -80,19 +79,25 @@ func (a STRUCT()) AscendRange(x, y K, cb func(x T) bool) bool {;;\
 };;\
 ;;\
 func (a STRUCT()) Reset() STRUCT() {;;\
-	return STRUCT(){nil};;\
+	for i := 0; i < a.size; i++ {;;\
+		>>> Need to prevent memory leaks on complex structs.;;\
+		a.data[i] = EMPTY();;\
+	};;\
+	a.size = 0;;\
+	return t;;\
 };;\
 ;;\
 func (a STRUCT()) AppendTo(p SLICE(T)) SLICE(T) {;;\
-	return append(p, a.data...);;\
+	return append(p, a.data[:a.size]...);;\
 };;\
 ;;\
 func (a STRUCT()) Len() int {;;\
-	return len(a.data);;\
+	return a.size;;\
 };;\
 ;;\
 func (a STRUCT()) Cap() int {;;\
-	return cap(a.data);;\
+	return VAR(Capacity) - a.size;;\
 };;\
+;;\
 
-#endif /* !_PPGO_STRUCT_ARRAY_ */
+#endif /* !_PPGO_STRUCT_SORTED_ARRAY_ */

@@ -1,15 +1,15 @@
 #include "ppgo/algorithm/sort.h"
 
 /**
- * This file contains an implementation of synchronized sorted array.
+ * This file contains an implementation of synchronized sorted slice.
  * It uses copy on write when there are some readers, otherway it makes
  * inplace mutations.
  */
 
-#ifndef _PPGO_STRUCT_SYNC_ARRAY_
-#define	_PPGO_STRUCT_SYNC_ARRAY_
+#ifndef _PPGO_STRUCT_SYNC_SORTED_SLICE_
+#define	_PPGO_STRUCT_SYNC_SORTED_SLICE_
 
-#define MAKE_ARRAY(T, K);;\
+#define MAKE_SYNC_SORTED_SLICE(T, K);;\
 import "sync";;\
 import "sync/atomic";;\
 ;;\
@@ -28,8 +28,8 @@ func CTOR()(n int) *STRUCT() {;;\
 	};;\
 };;\
 ;;\
->>> CONCAT(CTOR(), FromSlice) creates STRUCT() with src as underlying data.;;\
->>> Note that src is not copied and used by reference.;;\
+>>> CONCAT(CTOR(), FromSlice) creates STRUCT() with underlying data.;;\
+>>> Note that data is not copied and used by reference.;;\
 func CONCAT(CTOR(), FromSlice)(data SLICE(T)) *STRUCT() {;;\
 	PRIVATE_FUNC(STRUCT(), SortSource)(data, 0, len(data));;\
 	return &STRUCT(){;;\
@@ -266,4 +266,4 @@ func (a *STRUCT()) Len() int {;;\
 	defer atomic.AddInt64(&a.readers, -1);;\
 	a.mu.RUnlock()\
 
-#endif /* !_PPGO_STRUCT_SYNC_ARRAY_ */
+#endif /* !_PPGO_STRUCT_SYNC_SORTED_SLICE_ */

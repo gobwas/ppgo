@@ -6,32 +6,32 @@ package ints
 import "sync"
 import "sync/atomic"
 
-// SyncArray represents synchronized sorted array of int.
+// SyncSlice represents synchronized sorted array of int.
 // Note that in most cases you should store it somewhere by pointer.
 // This is needed because of non-pointer data inside, that used to syncrhonize usage.
-type SyncArray struct {
+type SyncSlice struct {
 	mu      sync.RWMutex
 	data    []int
 	readers int64
 }
 
-func NewSyncArray(n int) *SyncArray {
-	return &SyncArray{
+func NewSyncSlice(n int) *SyncSlice {
+	return &SyncSlice{
 		data: make([]int, 0, n),
 	}
 }
 
-// NewSyncArrayFromSlice creates SyncArray with src as underlying data.
-// Note that src is not copied and used by reference.
-func NewSyncArrayFromSlice(data []int) *SyncArray {
-	_SyncArraySortSource(data, 0, len(data))
-	return &SyncArray{
+// NewSyncSliceFromSlice creates SyncSlice with underlying data.
+// Note that data is not copied and used by reference.
+func NewSyncSliceFromSlice(data []int) *SyncSlice {
+	_SyncSliceSortSource(data, 0, len(data))
+	return &SyncSlice{
 		data: data,
 	}
 }
 
-// _SyncArraySortSource sorts data for further use inside SyncArray.
-func _SyncArraySortSource(data []int, lo, hi int) {
+// _SyncSliceSortSource sorts data for further use inside SyncSlice.
+func _SyncSliceSortSource(data []int, lo, hi int) {
 	if hi-lo <= 12 {
 		// Do insertion sort.
 		for i := lo + 1; i < hi; i++ {
@@ -55,14 +55,14 @@ func _SyncArraySortSource(data []int, lo, hi int) {
 	data[p], data[lo] = data[lo], data[p]
 
 	if lo < p {
-		_SyncArraySortSource(data, lo, p)
+		_SyncSliceSortSource(data, lo, p)
 	}
 	if p+1 < hi {
-		_SyncArraySortSource(data, p+1, hi)
+		_SyncSliceSortSource(data, p+1, hi)
 	}
 }
 
-func (a *SyncArray) Has(x int) bool {
+func (a *SyncSlice) Has(x int) bool {
 	a.mu.RLock()
 	data := a.data
 	atomic.AddInt64(&a.readers, 1)
@@ -92,7 +92,7 @@ func (a *SyncArray) Has(x int) bool {
 	return ok
 }
 
-func (a *SyncArray) Get(x int) (int, bool) {
+func (a *SyncSlice) Get(x int) (int, bool) {
 	a.mu.RLock()
 	data := a.data
 	atomic.AddInt64(&a.readers, 1)
@@ -125,7 +125,7 @@ func (a *SyncArray) Get(x int) (int, bool) {
 	return data[i], true
 }
 
-func (a *SyncArray) GetAny(it func() (int, bool)) (int, bool) {
+func (a *SyncSlice) GetAny(it func() (int, bool)) (int, bool) {
 	a.mu.RLock()
 	data := a.data
 	atomic.AddInt64(&a.readers, 1)
@@ -164,7 +164,7 @@ func (a *SyncArray) GetAny(it func() (int, bool)) (int, bool) {
 	return 0, false
 }
 
-func (a *SyncArray) Getsert(x int) int {
+func (a *SyncSlice) Getsert(x int) int {
 	a.mu.Lock()
 	// Binary search algorithm.
 	var has bool
@@ -222,7 +222,7 @@ func (a *SyncArray) Getsert(x int) int {
 	return x
 }
 
-func (a *SyncArray) GetsertFn(k int, factory func() int) int {
+func (a *SyncSlice) GetsertFn(k int, factory func() int) int {
 	a.mu.Lock()
 	// Binary search algorithm.
 	var has bool
@@ -281,7 +281,7 @@ func (a *SyncArray) GetsertFn(k int, factory func() int) int {
 	return x
 }
 
-func (a *SyncArray) GetsertAnyFn(it func() (int, bool), factory func() int) int {
+func (a *SyncSlice) GetsertAnyFn(it func() (int, bool), factory func() int) int {
 	a.mu.Lock()
 	for {
 		k, ok := it()
@@ -374,7 +374,7 @@ func (a *SyncArray) GetsertAnyFn(it func() (int, bool), factory func() int) int 
 // It returns previous item (if were present) and a boolean flag that reports
 // about previous item replacement. This flag is useful for non-pointer item types
 // such as numbers or struct values.
-func (a *SyncArray) Upsert(x int) (prev int, ok bool) {
+func (a *SyncSlice) Upsert(x int) (prev int, ok bool) {
 	a.mu.Lock()
 	// Binary search algorithm.
 	var has bool
@@ -436,7 +436,7 @@ func (a *SyncArray) Upsert(x int) (prev int, ok bool) {
 	return
 }
 
-func (a *SyncArray) Do(cb func([]int)) {
+func (a *SyncSlice) Do(cb func([]int)) {
 	a.mu.RLock()
 	data := a.data
 	atomic.AddInt64(&a.readers, 1)
@@ -445,7 +445,7 @@ func (a *SyncArray) Do(cb func([]int)) {
 	cb(data)
 }
 
-func (a *SyncArray) AppendTo(p []int) []int {
+func (a *SyncSlice) AppendTo(p []int) []int {
 	a.mu.RLock()
 	data := a.data
 	atomic.AddInt64(&a.readers, 1)
@@ -454,11 +454,11 @@ func (a *SyncArray) AppendTo(p []int) []int {
 	return append(p, data...)
 }
 
-func (a *SyncArray) Delete(x int) (int, bool) {
+func (a *SyncSlice) Delete(x int) (int, bool) {
 	return a.DeleteCond(x, nil)
 }
 
-func (a *SyncArray) DeleteCond(x int, predicate func(int) bool) (int, bool) {
+func (a *SyncSlice) DeleteCond(x int, predicate func(int) bool) (int, bool) {
 	a.mu.Lock()
 	// Binary search algorithm.
 	var has bool
@@ -505,7 +505,7 @@ func (a *SyncArray) DeleteCond(x int, predicate func(int) bool) (int, bool) {
 	return prev, true
 }
 
-func (a *SyncArray) Ascend(cb func(x int) bool) bool {
+func (a *SyncSlice) Ascend(cb func(x int) bool) bool {
 	a.mu.RLock()
 	data := a.data
 	atomic.AddInt64(&a.readers, 1)
@@ -519,7 +519,7 @@ func (a *SyncArray) Ascend(cb func(x int) bool) bool {
 	return true
 }
 
-func (a *SyncArray) AscendRange(x, y int, cb func(x int) bool) bool {
+func (a *SyncSlice) AscendRange(x, y int, cb func(x int) bool) bool {
 	a.mu.RLock()
 	data := a.data
 	atomic.AddInt64(&a.readers, 1)
@@ -575,7 +575,7 @@ func (a *SyncArray) AscendRange(x, y int, cb func(x int) bool) bool {
 	return true
 }
 
-func (a *SyncArray) Len() int {
+func (a *SyncSlice) Len() int {
 	a.mu.RLock()
 	n := len(a.data)
 	a.mu.RUnlock()

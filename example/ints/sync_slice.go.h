@@ -1,13 +1,13 @@
-#include "ppgo/struct/sync_array.h"
+#include "ppgo/struct/sync_slice.h"
 
 #define ID(a) a
 #define LESS_OR_EQUAL(a, b) a <= b
 #define GREATER(a, b) a > b
 #define FUNC(a) a
-#define STRUCT() SyncArray
-#define CTOR() NewSyncArray
+#define STRUCT() SyncSlice
+#define CTOR() NewSyncSlice
 #define EMPTY() 0
 
 package ints
 
-MAKE_ARRAY(int, int)
+MAKE_SYNC_SORTED_SLICE(int, int)

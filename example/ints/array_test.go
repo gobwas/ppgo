@@ -6,10 +6,10 @@ import (
 	"testing"
 )
 
-func TestTupleUpsertFill(t *testing.T) {
-	tuple := Tuple{}
+func TestArrayUpsertFill(t *testing.T) {
+	tuple := Array{}
 
-	for i := 0; i < TupleCapacity; i++ {
+	for i := 0; i < ArrayCapacity; i++ {
 		tuple, _, _ = tuple.Upsert(i)
 	}
 
@@ -30,8 +30,8 @@ func TestTupleUpsertFill(t *testing.T) {
 	}
 }
 
-func TestTupleUpsertDelete(t *testing.T) {
-	tuple := Tuple{}
+func TestArrayUpsertDelete(t *testing.T) {
+	tuple := Array{}
 
 	tuple, _, _ = tuple.Upsert(1)
 	tuple, _, _ = tuple.Upsert(3)
