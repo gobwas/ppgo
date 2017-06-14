@@ -110,7 +110,7 @@ func (a *STRUCT()) Len() int {;;\
 };;\
 ;;\
 func (a *STRUCT()) Cap() int {;;\
-	return VAR(Capacity) - a.size;;\
+	return VAR(Capacity);;\
 };;\
 ;;\
 

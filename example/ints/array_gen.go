@@ -253,5 +253,5 @@ func (a *Array) Len() int {
 }
 
 func (a *Array) Cap() int {
-	return ArrayCapacity - a.size
+	return ArrayCapacity
 }
