@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestSyncArrayGetAny(t *testing.T) {
+func TestSyncSliceGetAny(t *testing.T) {
 	for _, test := range []struct {
 		data   []int
 		get    []int
@@ -20,7 +20,7 @@ func TestSyncArrayGetAny(t *testing.T) {
 		},
 	} {
 		t.Run("", func(t *testing.T) {
-			s := NewSyncArray(0)
+			s := NewSyncSlice(0)
 			for _, v := range test.data {
 				s.Upsert(v)
 			}
@@ -32,7 +32,7 @@ func TestSyncArrayGetAny(t *testing.T) {
 	}
 }
 
-func TestSyncArrayGetsertAny(t *testing.T) {
+func TestSyncSliceGetsertAny(t *testing.T) {
 	for i, test := range []struct {
 		data   []int
 		get    []int
@@ -53,7 +53,7 @@ func TestSyncArrayGetsertAny(t *testing.T) {
 		},
 	} {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			s := NewSyncArray(0)
+			s := NewSyncSlice(0)
 			for _, v := range test.data {
 				s.Upsert(v)
 			}

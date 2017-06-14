@@ -15,12 +15,26 @@ type STRUCT() struct {;;\
 	size int;;\
 };;\
 ;;\
-func (a STRUCT()) Has(x K) bool {;;\
+>>> CTOR() creates STRUCT() with underlying sorted copy of given data.;;\
+func CTOR()(data SLICE(T)) STRUCT() {;;\
+	a := STRUCT(){};;\
+	a.size = copy(a.data, data);;\
+	a.sort(0, a.size);;\
+	return a;;\
+};;\
+;;\
+>>> sort sorts data for further use. It is intended to be;;\
+>>> used only once in CTOR().;;\
+func (a *STRUCT()) sort(lo, hi int) {\
+	MK_SORT(a.sort, a.data, lo, hi);;\
+};;\
+;;\
+func (a *STRUCT()) Has(x K) bool {;;\
 	DO_SEARCH_RANGE(a.data, x, 0, a.size, i, ok);;\
 	return ok;;\
 };;\
 ;;\
-func (a STRUCT()) Get(x K) (T, bool) {;;\
+func (a *STRUCT()) Get(x K) (T, bool) {;;\
 	DO_SEARCH_RANGE(a.data, x, 0, a.size, i, ok);;\
 	if !ok {;;\
 		return EMPTY(), false;;\
@@ -44,21 +58,21 @@ func (a STRUCT()) Upsert(x T) (cp STRUCT(), prev T, ok bool) {;;\
 		a.data[i] = x;;\
 		prev = EMPTY();;\
 	};;\
-	return t, prev, ok;;\
+	return a, prev, ok;;\
 };;\
 ;;\
 func (a STRUCT()) Delete(x K) (cp STRUCT(), prev T, ok bool) {;;\
 	DO_SEARCH_RANGE(a.data, ID(x), 0, a.size, i, has);;\
 	if !has {;;\
-		return t, EMPTY(), false;\
+		return a, EMPTY(), false;\
 	};;\
 	a.size--;;\
 	prev = a.data[i];;\
 	copy(a.data[i:a.size], a.data[i+1:a.size+1]);;\
-	return t, prev, true;;\
+	return a, prev, true;;\
 };;\
 ;;\
-func (a STRUCT()) Ascend(cb func(x T) bool) bool {;;\
+func (a *STRUCT()) Ascend(cb func(x T) bool) bool {;;\
 	for i := 0; i < a.size; i++ {;;\
 		if !cb(a.data[i]) {;;\
 			return false;;\
@@ -67,7 +81,7 @@ func (a STRUCT()) Ascend(cb func(x T) bool) bool {;;\
 	return true;;\
 };;\
 ;;\
-func (a STRUCT()) AscendRange(x, y K, cb func(x T) bool) bool {;;\
+func (a *STRUCT()) AscendRange(x, y K, cb func(x T) bool) bool {;;\
 	DO_SEARCH_RANGE(a.data, x, 0, a.size, i, hasX);;\
 	DO_SEARCH_RANGE(a.data, y, i, a.size, j, hasY);;\
 	for ; i < a.size && i <= j; i++ {;;\
@@ -84,18 +98,18 @@ func (a STRUCT()) Reset() STRUCT() {;;\
 		a.data[i] = EMPTY();;\
 	};;\
 	a.size = 0;;\
-	return t;;\
+	return a;;\
 };;\
 ;;\
-func (a STRUCT()) AppendTo(p SLICE(T)) SLICE(T) {;;\
+func (a *STRUCT()) AppendTo(p SLICE(T)) SLICE(T) {;;\
 	return append(p, a.data[:a.size]...);;\
 };;\
 ;;\
-func (a STRUCT()) Len() int {;;\
+func (a *STRUCT()) Len() int {;;\
 	return a.size;;\
 };;\
 ;;\
-func (a STRUCT()) Cap() int {;;\
+func (a *STRUCT()) Cap() int {;;\
 	return VAR(Capacity) - a.size;;\
 };;\
 ;;\

@@ -47,3 +47,29 @@ func TestArrayUpsertDelete(t *testing.T) {
 		t.Errorf("after upserting 1,3,2 and deleting 2 AppendTo() returns %v; want %v", act, exp)
 	}
 }
+
+func BenchmarkArrayGet(b *testing.B) {
+	tuple := Array{}
+	for i := 0; i < ArrayCapacity; i++ {
+		tuple, _, _ = tuple.Upsert(i)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = tuple.Get(0)
+	}
+}
+
+func BenchmarkArrayAscend(b *testing.B) {
+	tuple := Array{}
+	for i := 0; i < ArrayCapacity; i++ {
+		tuple, _, _ = tuple.Upsert(i)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		tuple.Ascend(func(v int) bool {
+			return true
+		})
+	}
+}

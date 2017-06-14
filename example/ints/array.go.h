@@ -3,6 +3,7 @@
 #define ID(a) a
 #define LESS_OR_EQUAL(a, b) a <= b
 #define STRUCT(a) Array
+#define CTOR() NewArray
 #define VAR(a) CONCAT(Array, a)
 #define EMPTY() 0
 
