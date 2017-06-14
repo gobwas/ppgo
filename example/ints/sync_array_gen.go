@@ -24,14 +24,14 @@ func NewSyncArray(n int) *SyncArray {
 // NewSyncArrayFromSlice creates SyncArray with src as underlying data.
 // Note that src is not copied and used by reference.
 func NewSyncArrayFromSlice(data []int) *SyncArray {
-	sortSyncArraySource(data, 0, len(data))
+	_SyncArraySortSource(data, 0, len(data))
 	return &SyncArray{
 		data: data,
 	}
 }
 
-// sortSyncArraySource sorts data for further use inside SyncArray.
-func sortSyncArraySource(data []int, lo, hi int) {
+// _SyncArraySortSource sorts data for further use inside SyncArray.
+func _SyncArraySortSource(data []int, lo, hi int) {
 	if hi-lo <= 12 {
 		// Do insertion sort.
 		for i := lo + 1; i < hi; i++ {
@@ -55,10 +55,10 @@ func sortSyncArraySource(data []int, lo, hi int) {
 	data[p], data[lo] = data[lo], data[p]
 
 	if lo < p {
-		sortSyncArraySource(data, lo, p)
+		_SyncArraySortSource(data, lo, p)
 	}
 	if p+1 < hi {
-		sortSyncArraySource(data, p+1, hi)
+		_SyncArraySortSource(data, p+1, hi)
 	}
 }
 

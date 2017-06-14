@@ -7,6 +7,8 @@
 #define _CONCAT(a, b) a ## b
 #define CONCAT(a, b) _CONCAT(a, b)
 
+#define PRIVATE_FUNC(prefix, name) CONCAT(CONCAT(_, prefix), name)
+
 #define SWAP(data, a, b)\
 	data[a], data[b] = data[b], data[a]\
 
