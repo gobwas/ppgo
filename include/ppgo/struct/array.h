@@ -61,6 +61,7 @@ func (a STRUCT()) Upsert(x T) (cp STRUCT(), prev T, ok bool) {;;\
 	return a, prev, ok;;\
 };;\
 ;;\
+>>> Delete removes x from STRUCT(). It returns true when x was present and removed.;;\
 func (a STRUCT()) Delete(x K) (cp STRUCT(), prev T, ok bool) {;;\
 	DO_SEARCH_RANGE(a.data, ID(x), 0, a.size, i, has);;\
 	if !has {;;\

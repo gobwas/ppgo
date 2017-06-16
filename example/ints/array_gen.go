@@ -144,6 +144,7 @@ func (a Array) Upsert(x int) (cp Array, prev int, ok bool) {
 	return a, prev, ok
 }
 
+// Delete removes x from Array. It returns true when x was present and removed.
 func (a Array) Delete(x int) (cp Array, prev int, ok bool) {
 	// Binary search algorithm.
 	var has bool
