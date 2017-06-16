@@ -47,22 +47,22 @@ func (a *STRUCT()) Get(x K) (T, bool) {;;\
 >>> non-pointer item types such as numbers or struct values.;;\
 >>> ;;\
 >>> Note that it will panic on out of range insertion.;;\
-func (a STRUCT()) Upsert(x T) (cp STRUCT(), prev T, ok bool) {;;\
+func (a STRUCT()) Upsert(x T) (cp STRUCT(), prev T, replaced bool) {;;\
 	DO_SEARCH_RANGE(a.data, ID(x), 0, a.size, i, has);;\
 	if has {;;\
 		a.data[i], prev = x, a.data[i];;\
-		ok = true;;\
+		replaced = true;;\
 	} else {;;\
 		a.size++;;\
 		copy(a.data[i+1:a.size], a.data[i:a.size-1]);;\
 		a.data[i] = x;;\
 		prev = EMPTY();;\
 	};;\
-	return a, prev, ok;;\
+	return a, prev, replaced;;\
 };;\
 ;;\
 >>> Delete removes x from STRUCT(). It returns true when x was present and removed.;;\
-func (a STRUCT()) Delete(x K) (cp STRUCT(), prev T, ok bool) {;;\
+func (a STRUCT()) Delete(x K) (cp STRUCT(), prev T, removed bool) {;;\
 	DO_SEARCH_RANGE(a.data, ID(x), 0, a.size, i, has);;\
 	if !has {;;\
 		return a, EMPTY(), false;\
