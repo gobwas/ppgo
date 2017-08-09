@@ -65,6 +65,9 @@ func _SyncSliceSortSource(data []int, lo, hi int) {
 func (a *SyncSlice) Has(x int) bool {
 	a.mu.RLock()
 	data := a.data
+	// Need to increment readers atomically here under read lock to ensure
+	// that in places under write lock there will be no races on readers count.
+	// That is, non-zero readers mean that someone 100% took the data pointer
 	atomic.AddInt64(&a.readers, 1)
 	defer atomic.AddInt64(&a.readers, -1)
 	a.mu.RUnlock()
@@ -95,6 +98,9 @@ func (a *SyncSlice) Has(x int) bool {
 func (a *SyncSlice) Get(x int) (int, bool) {
 	a.mu.RLock()
 	data := a.data
+	// Need to increment readers atomically here under read lock to ensure
+	// that in places under write lock there will be no races on readers count.
+	// That is, non-zero readers mean that someone 100% took the data pointer
 	atomic.AddInt64(&a.readers, 1)
 	defer atomic.AddInt64(&a.readers, -1)
 	a.mu.RUnlock()
@@ -128,6 +134,9 @@ func (a *SyncSlice) Get(x int) (int, bool) {
 func (a *SyncSlice) GetAny(it func() (int, bool)) (int, bool) {
 	a.mu.RLock()
 	data := a.data
+	// Need to increment readers atomically here under read lock to ensure
+	// that in places under write lock there will be no races on readers count.
+	// That is, non-zero readers mean that someone 100% took the data pointer
 	atomic.AddInt64(&a.readers, 1)
 	defer atomic.AddInt64(&a.readers, -1)
 	a.mu.RUnlock()
@@ -439,6 +448,9 @@ func (a *SyncSlice) Upsert(x int) (prev int, ok bool) {
 func (a *SyncSlice) Do(cb func([]int)) {
 	a.mu.RLock()
 	data := a.data
+	// Need to increment readers atomically here under read lock to ensure
+	// that in places under write lock there will be no races on readers count.
+	// That is, non-zero readers mean that someone 100% took the data pointer
 	atomic.AddInt64(&a.readers, 1)
 	defer atomic.AddInt64(&a.readers, -1)
 	a.mu.RUnlock()
@@ -448,6 +460,9 @@ func (a *SyncSlice) Do(cb func([]int)) {
 func (a *SyncSlice) AppendTo(p []int) []int {
 	a.mu.RLock()
 	data := a.data
+	// Need to increment readers atomically here under read lock to ensure
+	// that in places under write lock there will be no races on readers count.
+	// That is, non-zero readers mean that someone 100% took the data pointer
 	atomic.AddInt64(&a.readers, 1)
 	defer atomic.AddInt64(&a.readers, -1)
 	a.mu.RUnlock()
@@ -508,6 +523,9 @@ func (a *SyncSlice) DeleteCond(x int, predicate func(int) bool) (int, bool) {
 func (a *SyncSlice) Ascend(cb func(x int) bool) bool {
 	a.mu.RLock()
 	data := a.data
+	// Need to increment readers atomically here under read lock to ensure
+	// that in places under write lock there will be no races on readers count.
+	// That is, non-zero readers mean that someone 100% took the data pointer
 	atomic.AddInt64(&a.readers, 1)
 	defer atomic.AddInt64(&a.readers, -1)
 	a.mu.RUnlock()
@@ -522,6 +540,9 @@ func (a *SyncSlice) Ascend(cb func(x int) bool) bool {
 func (a *SyncSlice) AscendRange(x, y int, cb func(x int) bool) bool {
 	a.mu.RLock()
 	data := a.data
+	// Need to increment readers atomically here under read lock to ensure
+	// that in places under write lock there will be no races on readers count.
+	// That is, non-zero readers mean that someone 100% took the data pointer
 	atomic.AddInt64(&a.readers, 1)
 	defer atomic.AddInt64(&a.readers, -1)
 	a.mu.RUnlock()

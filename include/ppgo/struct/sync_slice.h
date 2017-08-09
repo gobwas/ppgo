@@ -262,6 +262,9 @@ func (a *STRUCT()) Len() int {;;\
 #define READ_DATA(DATA)\
 	a.mu.RLock();;\
 	DATA := a.data;;\
+	>>> Need to increment readers atomically here under read lock to ensure;;\
+	>>> that in places under write lock there will be no races on readers count.;;\
+	>>> That is, non-zero readers mean that someone 100% took the data pointer;;\
 	atomic.AddInt64(&a.readers, 1);;\
 	defer atomic.AddInt64(&a.readers, -1);;\
 	a.mu.RUnlock()\
