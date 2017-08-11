@@ -25,12 +25,12 @@ func PRIVATE_FUNC(STRUCT(), SortSource)(data SLICE(T), lo, hi int) {\
 };;\
 ;;\
 func (a STRUCT()) Has(x K) bool {;;\
-	DO_SEARCH(a.data, ID(x), i, ok);;\
+	DO_SEARCH(a.data, x, i, ok);;\
 	return ok;;\
 };;\
 ;;\
 func (a STRUCT()) Get(x K) (T, bool) {;;\
-	DO_SEARCH(a.data, ID(x), i, ok);;\
+	DO_SEARCH(a.data, x, i, ok);;\
 	if !ok {;;\
 		return EMPTY(), false;;\
 	};;\
@@ -41,14 +41,14 @@ func (a STRUCT()) Get(x K) (T, bool) {;;\
 >>> It returns copy of STRUCT(), previous item (if were present) and a boolean;;\
 >>> flag that reports about previous item replacement. This flag is useful for;;\
 >>> non-pointer item types such as numbers or struct values.;;\
-func (a STRUCT()) Upsert(x T) (cp STRUCT(), prev T, ok bool) {;;\
+func (a STRUCT()) Upsert(x T) (cp STRUCT(), prev T, swapped bool) {;;\
 	var with SLICE(T);;\
 	DO_SEARCH(a.data, ID(x), i, has);;\
 	if has {;;\
 		with = make(SLICE(T), len(a.data));;\
 		copy(with, a.data);;\
 		with[i], prev = x, a.data[i];;\
-		ok = true;;\
+		swapped = true;;\
 	} else {;;\
 		with = make(SLICE(T), len(a.data)+1);;\
 		copy(with[:i], a.data[:i]);;\
@@ -56,11 +56,11 @@ func (a STRUCT()) Upsert(x T) (cp STRUCT(), prev T, ok bool) {;;\
 		with[i] = x;;\
 		prev = EMPTY();;\
 	};;\
-	return STRUCT(){with}, prev, ok;;\
+	return STRUCT(){with}, prev, swapped;;\
 };;\
 ;;\
 func (a STRUCT()) Delete(x K) (STRUCT(), T, bool) {;;\
-	DO_SEARCH(a.data, ID(x), i, has);;\
+	DO_SEARCH(a.data, x, i, has);;\
 	if !has {;;\
 		return a, EMPTY(), false;\
 	};;\
@@ -80,8 +80,8 @@ func (a STRUCT()) Ascend(cb func(x T) bool) bool {;;\
 };;\
 ;;\
 func (a STRUCT()) AscendRange(x, y K, cb func(x T) bool) bool {;;\
-	DO_SEARCH_RANGE(a.data, ID(x), 0, len(a.data), i, hasX);;\
-	DO_SEARCH_RANGE(a.data, ID(y), i, len(a.data), j, hasY);;\
+	DO_SEARCH_RANGE(a.data, x, 0, len(a.data), i, hasX);;\
+	DO_SEARCH_RANGE(a.data, y, i, len(a.data), j, hasY);;\
 	for ; i < len(a.data) && i <= j; i++ {;;\
 		if !cb(a.data[i]) {;;\
 			return false;;\
