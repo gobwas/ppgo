@@ -4,14 +4,14 @@
 package ints
 
 type SortedSlice struct {
-	data []int
+	Data []int
 }
 
 // NewSortedSlice creates SortedSlice with underlying data.
 // Note that data is not copied and used by reference.
 func NewSortedSlice(data []int) SortedSlice {
 	_SortedSliceSortSource(data, 0, len(data))
-	return SortedSlice{data: data}
+	return SortedSlice{Data: data}
 }
 
 // _SortedSliceSortSource sorts data for further use inside SortedSlice.
@@ -52,16 +52,16 @@ func (a SortedSlice) Has(x int) bool {
 	var i int
 	{
 		l := 0
-		r := len(a.data)
+		r := len(a.Data)
 		for !ok && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m] == x:
+			case a.Data[m] == x:
 				ok = true
 				r = m
-			case a.data[m] < x:
+			case a.Data[m] < x:
 				l = m + 1
-			case a.data[m] > x:
+			case a.Data[m] > x:
 				r = m
 			}
 		}
@@ -77,16 +77,16 @@ func (a SortedSlice) Get(x int) (int, bool) {
 	var i int
 	{
 		l := 0
-		r := len(a.data)
+		r := len(a.Data)
 		for !ok && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m] == x:
+			case a.Data[m] == x:
 				ok = true
 				r = m
-			case a.data[m] < x:
+			case a.Data[m] < x:
 				l = m + 1
-			case a.data[m] > x:
+			case a.Data[m] > x:
 				r = m
 			}
 		}
@@ -96,7 +96,7 @@ func (a SortedSlice) Get(x int) (int, bool) {
 	if !ok {
 		return 0, false
 	}
-	return a.data[i], true
+	return a.Data[i], true
 }
 
 // Upsert inserts item x into array or updates existing one.
@@ -110,16 +110,16 @@ func (a SortedSlice) Upsert(x int) (cp SortedSlice, prev int, swapped bool) {
 	var i int
 	{
 		l := 0
-		r := len(a.data)
+		r := len(a.Data)
 		for !has && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m] == x:
+			case a.Data[m] == x:
 				has = true
 				r = m
-			case a.data[m] < x:
+			case a.Data[m] < x:
 				l = m + 1
-			case a.data[m] > x:
+			case a.Data[m] > x:
 				r = m
 			}
 		}
@@ -127,14 +127,14 @@ func (a SortedSlice) Upsert(x int) (cp SortedSlice, prev int, swapped bool) {
 		_ = i // in case when i not being used
 	}
 	if has {
-		with = make([]int, len(a.data))
-		copy(with, a.data)
-		with[i], prev = x, a.data[i]
+		with = make([]int, len(a.Data))
+		copy(with, a.Data)
+		with[i], prev = x, a.Data[i]
 		swapped = true
 	} else {
-		with = make([]int, len(a.data)+1)
-		copy(with[:i], a.data[:i])
-		copy(with[i+1:], a.data[i:])
+		with = make([]int, len(a.Data)+1)
+		copy(with[:i], a.Data[:i])
+		copy(with[i+1:], a.Data[i:])
 		with[i] = x
 		prev = 0
 	}
@@ -147,16 +147,16 @@ func (a SortedSlice) Delete(x int) (SortedSlice, int, bool) {
 	var i int
 	{
 		l := 0
-		r := len(a.data)
+		r := len(a.Data)
 		for !has && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m] == x:
+			case a.Data[m] == x:
 				has = true
 				r = m
-			case a.data[m] < x:
+			case a.Data[m] < x:
 				l = m + 1
-			case a.data[m] > x:
+			case a.Data[m] > x:
 				r = m
 			}
 		}
@@ -166,14 +166,14 @@ func (a SortedSlice) Delete(x int) (SortedSlice, int, bool) {
 	if !has {
 		return a, 0, false
 	}
-	without := make([]int, len(a.data)-1)
-	copy(without[:i], a.data[:i])
-	copy(without[i:], a.data[i+1:])
-	return SortedSlice{without}, a.data[i], true
+	without := make([]int, len(a.Data)-1)
+	copy(without[:i], a.Data[:i])
+	copy(without[i:], a.Data[i+1:])
+	return SortedSlice{without}, a.Data[i], true
 }
 
 func (a SortedSlice) Ascend(cb func(x int) bool) bool {
-	for _, x := range a.data {
+	for _, x := range a.Data {
 		if !cb(x) {
 			return false
 		}
@@ -187,16 +187,16 @@ func (a SortedSlice) AscendRange(x, y int, cb func(x int) bool) bool {
 	var i int
 	{
 		l := 0
-		r := len(a.data)
+		r := len(a.Data)
 		for !hasX && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m] == x:
+			case a.Data[m] == x:
 				hasX = true
 				r = m
-			case a.data[m] < x:
+			case a.Data[m] < x:
 				l = m + 1
-			case a.data[m] > x:
+			case a.Data[m] > x:
 				r = m
 			}
 		}
@@ -208,24 +208,24 @@ func (a SortedSlice) AscendRange(x, y int, cb func(x int) bool) bool {
 	var j int
 	{
 		l := i
-		r := len(a.data)
+		r := len(a.Data)
 		for !hasY && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m] == y:
+			case a.Data[m] == y:
 				hasY = true
 				r = m
-			case a.data[m] < y:
+			case a.Data[m] < y:
 				l = m + 1
-			case a.data[m] > y:
+			case a.Data[m] > y:
 				r = m
 			}
 		}
 		j = r
 		_ = j // in case when j not being used
 	}
-	for ; i < len(a.data) && i <= j; i++ {
-		if !cb(a.data[i]) {
+	for ; i < len(a.Data) && i <= j; i++ {
+		if !cb(a.Data[i]) {
 			return false
 		}
 	}
@@ -237,13 +237,5 @@ func (a SortedSlice) Reset() SortedSlice {
 }
 
 func (a SortedSlice) AppendTo(p []int) []int {
-	return append(p, a.data...)
-}
-
-func (a SortedSlice) Len() int {
-	return len(a.data)
-}
-
-func (a SortedSlice) Cap() int {
-	return cap(a.data)
+	return append(p, a.Data...)
 }

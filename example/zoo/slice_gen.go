@@ -3,19 +3,19 @@
 
 package zoo
 
-type SortedSlice struct {
-	data []Animal
+type Animals struct {
+	Data []Animal
 }
 
-// NewSortedSlice creates SortedSlice with underlying data.
+// NewAnimals creates Animals with underlying data.
 // Note that data is not copied and used by reference.
-func NewSortedSlice(data []Animal) SortedSlice {
-	_SortedSliceSortSource(data, 0, len(data))
-	return SortedSlice{data: data}
+func NewAnimals(data []Animal) Animals {
+	_AnimalsSortSource(data, 0, len(data))
+	return Animals{Data: data}
 }
 
-// _SortedSliceSortSource sorts data for further use inside SortedSlice.
-func _SortedSliceSortSource(data []Animal, lo, hi int) {
+// _AnimalsSortSource sorts data for further use inside Animals.
+func _AnimalsSortSource(data []Animal, lo, hi int) {
 	if hi-lo <= 12 {
 		// Do insertion sort.
 		for i := lo + 1; i < hi; i++ {
@@ -39,29 +39,29 @@ func _SortedSliceSortSource(data []Animal, lo, hi int) {
 	data[p], data[lo] = data[lo], data[p]
 
 	if lo < p {
-		_SortedSliceSortSource(data, lo, p)
+		_AnimalsSortSource(data, lo, p)
 	}
 	if p+1 < hi {
-		_SortedSliceSortSource(data, p+1, hi)
+		_AnimalsSortSource(data, p+1, hi)
 	}
 }
 
-func (a SortedSlice) Has(x string) bool {
+func (a Animals) Has(x string) bool {
 	// Binary search algorithm.
 	var ok bool
 	var i int
 	{
 		l := 0
-		r := len(a.data)
+		r := len(a.Data)
 		for !ok && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m].Name == x:
+			case a.Data[m].Name == x:
 				ok = true
 				r = m
-			case a.data[m].Name < x:
+			case a.Data[m].Name < x:
 				l = m + 1
-			case a.data[m].Name > x:
+			case a.Data[m].Name > x:
 				r = m
 			}
 		}
@@ -71,22 +71,22 @@ func (a SortedSlice) Has(x string) bool {
 	return ok
 }
 
-func (a SortedSlice) Get(x string) (Animal, bool) {
+func (a Animals) Get(x string) (Animal, bool) {
 	// Binary search algorithm.
 	var ok bool
 	var i int
 	{
 		l := 0
-		r := len(a.data)
+		r := len(a.Data)
 		for !ok && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m].Name == x:
+			case a.Data[m].Name == x:
 				ok = true
 				r = m
-			case a.data[m].Name < x:
+			case a.Data[m].Name < x:
 				l = m + 1
-			case a.data[m].Name > x:
+			case a.Data[m].Name > x:
 				r = m
 			}
 		}
@@ -96,30 +96,30 @@ func (a SortedSlice) Get(x string) (Animal, bool) {
 	if !ok {
 		return Animal{}, false
 	}
-	return a.data[i], true
+	return a.Data[i], true
 }
 
 // Upsert inserts item x into array or updates existing one.
-// It returns copy of SortedSlice, previous item (if were present) and a boolean
+// It returns copy of Animals, previous item (if were present) and a boolean
 // flag that reports about previous item replacement. This flag is useful for
 // non-pointer item types such as numbers or struct values.
-func (a SortedSlice) Upsert(x Animal) (cp SortedSlice, prev Animal, swapped bool) {
+func (a Animals) Upsert(x Animal) (cp Animals, prev Animal, swapped bool) {
 	var with []Animal
 	// Binary search algorithm.
 	var has bool
 	var i int
 	{
 		l := 0
-		r := len(a.data)
+		r := len(a.Data)
 		for !has && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m].Name == x.Name:
+			case a.Data[m].Name == x.Name:
 				has = true
 				r = m
-			case a.data[m].Name < x.Name:
+			case a.Data[m].Name < x.Name:
 				l = m + 1
-			case a.data[m].Name > x.Name:
+			case a.Data[m].Name > x.Name:
 				r = m
 			}
 		}
@@ -127,36 +127,36 @@ func (a SortedSlice) Upsert(x Animal) (cp SortedSlice, prev Animal, swapped bool
 		_ = i // in case when i not being used
 	}
 	if has {
-		with = make([]Animal, len(a.data))
-		copy(with, a.data)
-		with[i], prev = x, a.data[i]
+		with = make([]Animal, len(a.Data))
+		copy(with, a.Data)
+		with[i], prev = x, a.Data[i]
 		swapped = true
 	} else {
-		with = make([]Animal, len(a.data)+1)
-		copy(with[:i], a.data[:i])
-		copy(with[i+1:], a.data[i:])
+		with = make([]Animal, len(a.Data)+1)
+		copy(with[:i], a.Data[:i])
+		copy(with[i+1:], a.Data[i:])
 		with[i] = x
 		prev = Animal{}
 	}
-	return SortedSlice{with}, prev, swapped
+	return Animals{with}, prev, swapped
 }
 
-func (a SortedSlice) Delete(x string) (SortedSlice, Animal, bool) {
+func (a Animals) Delete(x string) (Animals, Animal, bool) {
 	// Binary search algorithm.
 	var has bool
 	var i int
 	{
 		l := 0
-		r := len(a.data)
+		r := len(a.Data)
 		for !has && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m].Name == x:
+			case a.Data[m].Name == x:
 				has = true
 				r = m
-			case a.data[m].Name < x:
+			case a.Data[m].Name < x:
 				l = m + 1
-			case a.data[m].Name > x:
+			case a.Data[m].Name > x:
 				r = m
 			}
 		}
@@ -166,14 +166,14 @@ func (a SortedSlice) Delete(x string) (SortedSlice, Animal, bool) {
 	if !has {
 		return a, Animal{}, false
 	}
-	without := make([]Animal, len(a.data)-1)
-	copy(without[:i], a.data[:i])
-	copy(without[i:], a.data[i+1:])
-	return SortedSlice{without}, a.data[i], true
+	without := make([]Animal, len(a.Data)-1)
+	copy(without[:i], a.Data[:i])
+	copy(without[i:], a.Data[i+1:])
+	return Animals{without}, a.Data[i], true
 }
 
-func (a SortedSlice) Ascend(cb func(x Animal) bool) bool {
-	for _, x := range a.data {
+func (a Animals) Ascend(cb func(x Animal) bool) bool {
+	for _, x := range a.Data {
 		if !cb(x) {
 			return false
 		}
@@ -181,22 +181,22 @@ func (a SortedSlice) Ascend(cb func(x Animal) bool) bool {
 	return true
 }
 
-func (a SortedSlice) AscendRange(x, y string, cb func(x Animal) bool) bool {
+func (a Animals) AscendRange(x, y string, cb func(x Animal) bool) bool {
 	// Binary search algorithm.
 	var hasX bool
 	var i int
 	{
 		l := 0
-		r := len(a.data)
+		r := len(a.Data)
 		for !hasX && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m].Name == x:
+			case a.Data[m].Name == x:
 				hasX = true
 				r = m
-			case a.data[m].Name < x:
+			case a.Data[m].Name < x:
 				l = m + 1
-			case a.data[m].Name > x:
+			case a.Data[m].Name > x:
 				r = m
 			}
 		}
@@ -208,42 +208,34 @@ func (a SortedSlice) AscendRange(x, y string, cb func(x Animal) bool) bool {
 	var j int
 	{
 		l := i
-		r := len(a.data)
+		r := len(a.Data)
 		for !hasY && l < r {
 			m := l + (r-l)/2
 			switch {
-			case a.data[m].Name == y:
+			case a.Data[m].Name == y:
 				hasY = true
 				r = m
-			case a.data[m].Name < y:
+			case a.Data[m].Name < y:
 				l = m + 1
-			case a.data[m].Name > y:
+			case a.Data[m].Name > y:
 				r = m
 			}
 		}
 		j = r
 		_ = j // in case when j not being used
 	}
-	for ; i < len(a.data) && i <= j; i++ {
-		if !cb(a.data[i]) {
+	for ; i < len(a.Data) && i <= j; i++ {
+		if !cb(a.Data[i]) {
 			return false
 		}
 	}
 	return true
 }
 
-func (a SortedSlice) Reset() SortedSlice {
-	return SortedSlice{nil}
+func (a Animals) Reset() Animals {
+	return Animals{nil}
 }
 
-func (a SortedSlice) AppendTo(p []Animal) []Animal {
-	return append(p, a.data...)
-}
-
-func (a SortedSlice) Len() int {
-	return len(a.data)
-}
-
-func (a SortedSlice) Cap() int {
-	return cap(a.data)
+func (a Animals) AppendTo(p []Animal) []Animal {
+	return append(p, a.Data...)
 }

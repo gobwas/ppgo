@@ -17,9 +17,9 @@ func TestSortedSliceNew(t *testing.T) {
 		},
 	} {
 		t.Run("", func(t *testing.T) {
-			s := NewSortedSlice(test.in)
-			if !reflect.DeepEqual(s.data, test.exp) {
-				t.Errorf("NewSortedSlice = %+v; want %v", s.data, test.exp)
+			s := NewAnimals(test.in)
+			if !reflect.DeepEqual(s.Data, test.exp) {
+				t.Errorf("NewAnimals = %+v; want %v", s.Data, test.exp)
 			}
 		})
 	}
@@ -43,9 +43,9 @@ func TestSortedSliceGet(t *testing.T) {
 		},
 	} {
 		t.Run("", func(t *testing.T) {
-			s := NewSortedSlice(test.in)
+			s := NewAnimals(test.in)
 			if _, ok := s.Get(test.get); ok != test.exp {
-				t.Errorf("Get(%s) from %s: %t; want %t", test.get, s.data, ok, test.exp)
+				t.Errorf("Get(%s) from %s: %t; want %t", test.get, s.Data, ok, test.exp)
 			}
 		})
 	}
@@ -72,17 +72,17 @@ func TestSortedSliceUpsert(t *testing.T) {
 		},
 	} {
 		t.Run("", func(t *testing.T) {
-			s := NewSortedSlice(test.in)
+			s := NewAnimals(test.in)
 			upsert := Animal{Name: test.upsert}
 			cp, _, swapped := s.Upsert(upsert)
 			if swapped != test.expSwap {
 				t.Errorf(
 					"Upsert(%s) to %s: swapped %t; want %t",
-					test.upsert, s.data, swapped, test.expSwap,
+					test.upsert, s.Data, swapped, test.expSwap,
 				)
 			}
-			if !reflect.DeepEqual(cp.data, test.expData) {
-				t.Errorf("Upsert(%s) = %+v; want %v", test.upsert, cp.data, test.expData)
+			if !reflect.DeepEqual(cp.Data, test.expData) {
+				t.Errorf("Upsert(%s) = %+v; want %v", test.upsert, cp.Data, test.expData)
 			}
 		})
 	}
@@ -109,16 +109,16 @@ func TestSortedSliceDelete(t *testing.T) {
 		},
 	} {
 		t.Run("", func(t *testing.T) {
-			s := NewSortedSlice(test.in)
+			s := NewAnimals(test.in)
 			cp, _, removed := s.Delete(test.del)
 			if removed != test.expRemove {
 				t.Errorf(
 					"Delete(%s) to %s: removed %t; want %t",
-					test.del, s.data, removed, test.expRemove,
+					test.del, s.Data, removed, test.expRemove,
 				)
 			}
-			if !reflect.DeepEqual(cp.data, test.expData) {
-				t.Errorf("Delete(%s) = %+v; want %v", test.del, cp.data, test.expData)
+			if !reflect.DeepEqual(cp.Data, test.expData) {
+				t.Errorf("Delete(%s) = %+v; want %v", test.del, cp.Data, test.expData)
 			}
 		})
 	}

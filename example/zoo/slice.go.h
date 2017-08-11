@@ -3,8 +3,8 @@
 #define ID(a) a.Name
 #define LESS_OR_EQUAL(a, b) a.Name <= b.Name
 #define FUNC(a) a
-#define STRUCT(a) SortedSlice
-#define CTOR() NewSortedSlice
+#define STRUCT(a) Animals
+#define CTOR() NewAnimals
 #define EMPTY() Animal{}
 
 package zoo
