@@ -59,6 +59,31 @@ func (h *Heap) Heapify() {
 	}
 }
 
+// Ascend calls it for every item in heap in order.
+func (h *Heap) Ascend(it func(x int) bool) {
+	n := len(h.data)
+	restore := h.data
+	for i := 0; i < n; i++ {
+		if !it(h.data[0]) {
+			break
+		}
+		h.data = h.data[1:]
+		h.siftDown(0)
+	}
+	h.data = restore
+	// No need to make h.Heapify() cause we get top element the same.
+	// The rest of heap will be rebuilt during lifetime.
+}
+
+// ForEach calls it for every item in heap not in order.
+func (h *Heap) ForEach(it func(x int) bool) {
+	for _, x := range h.data {
+		if !it(x) {
+			return
+		}
+	}
+}
+
 func (h *Heap) Slice() []int {
 	cp := *h
 	cp.data = make([]int, len(h.data))

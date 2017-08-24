@@ -135,6 +135,31 @@ func (h *IndexedHeap) Remove(x int) {
 	h.Pop()
 }
 
+// Ascend calls it for every item in heap in order.
+func (h *IndexedHeap) Ascend(it func(x int, w int) bool) {
+	n := len(h.data)
+	restore := h.data
+	for i := 0; i < n; i++ {
+		if !it(h.data[0].x, h.data[0].w) {
+			break
+		}
+		h.data = h.data[1:]
+		h.siftDown(0)
+	}
+	h.data = restore
+	// No need to make h.Heapify() cause we get top element the same.
+	// The rest of heap will be rebuilt during lifetime.
+}
+
+// ForEach calls it for every item in heap not in order.
+func (h *IndexedHeap) ForEach(it func(x int, w int) bool) {
+	for _, r := range h.data {
+		if !it(r.x, r.w) {
+			return
+		}
+	}
+}
+
 func (h *IndexedHeap) update(i int, r recordIndexedHeap) {
 	prev := h.data[i]
 	h.data[i] = r

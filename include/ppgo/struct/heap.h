@@ -54,6 +54,31 @@ func (h *STRUCT()) Heapify() {;;\
 	_HEAPIFY(_HEAP_SWAP);;\
 };;\
 ;;\
+>>> Ascend calls it for every item in heap in order.;;\
+func (h *STRUCT()) Ascend(it func(x T) bool) {;;\
+	n := len(h.data);;\
+	restore := h.data;;\
+	for i := 0; i < n; i++ {;;\
+		if !it(h.data[0]) {;;\
+			break;;\
+		};;\
+		h.data = h.data[1:];;\
+		h.siftDown(0);;\
+	};;\
+	h.data = restore;;\
+	>>> No need to make h.Heapify() cause we get top element the same.;;\
+	>>> The rest of heap will be rebuilt during lifetime.;;\
+};;\
+;;\
+>>> ForEach calls it for every item in heap not in order.;;\
+func (h *STRUCT()) ForEach(it func(x T) bool) {;;\
+	for _, x := range h.data {;;\
+		if !it(x) {;;\
+			return;;\
+		};;\
+	};;\
+};;\
+;;\
 func (h *STRUCT()) Slice() []T {;;\
 	cp := *h;;\
 	cp.data = make([]T, len(h.data));;\
