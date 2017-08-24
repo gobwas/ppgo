@@ -26,6 +26,9 @@ func NewHeapFromSlice(data []int, d int) *Heap {
 }
 
 func (h *Heap) Top() int {
+	if len(h.data) == 0 {
+		return 0
+	}
 	return h.data[0]
 }
 

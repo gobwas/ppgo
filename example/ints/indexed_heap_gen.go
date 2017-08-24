@@ -38,6 +38,9 @@ func NewIndexedHeapFromSlice(data []int, d int) *IndexedHeap {
 }
 
 func (h *IndexedHeap) Top() int {
+	if len(h.data) == 0 {
+		return 0
+	}
 	return h.data[0].x
 }
 

@@ -46,6 +46,9 @@ func CONCAT(CTOR(), FromSlice)(data []T, d int) *STRUCT() {;;\
 };;\
 ;;\
 func (h *STRUCT()) Top() T {;;\
+	if len(h.data) == 0 {;;\
+		return EMPTY();;\
+	};;\
 	return h.data[0].x;;\
 };;\
 ;;\
